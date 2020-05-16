@@ -24,3 +24,4 @@
 <!-- All required functionability for the shop -->
 <script src="js/index.js"></script>
 <script src="js/product.js"></script>
+<script src="js/cookie.js"></script>

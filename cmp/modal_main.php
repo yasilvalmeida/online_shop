@@ -111,25 +111,6 @@
         </div>
     </div>
 </div>
-<!-- Order Modal-->
-<div class="modal fade" id="order_modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">My orders</h5>
-                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">×</span>
-                </button>
-            </div>
-            <div id="orderContent" class="modal-body">
-                <!-- Content depend of the cases -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 <!-- Rating Modal-->
 <div class="modal fade" id="rating_modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
@@ -141,10 +122,10 @@
                 </button>
             </div>
             <div id="ratingContent" class="modal-body">
-                <!-- Content depend of the cases -->
+                <!-- Content depends on the cases -->
             </div>
             <div id="ratingButtons" class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
+                <!-- Buttons depend on the cases -->
             </div>
         </div>
     </div>
@@ -165,6 +146,25 @@
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
                 <a class="btn btn-success" href="javascript:buy()">Buy</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Order Modal-->
+<div class="modal fade" id="order_modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">My orders</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div id="orderContent" class="modal-body">
+                <!-- Content depend of the cases -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
