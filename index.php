@@ -45,8 +45,12 @@
       </nav>
     </div>
     <div class="container">
-      <div id="content" class="card-deck mb-3 text-center"><!-- Content here --></div>
-      <div id="pagination"><!-- Pagination here --></div>
+      <div id="productContent" class="card-deck mb-3 text-center">
+        <!-- Content here -->
+      </div>
+      <div id="productPagination">
+        <!-- Pagination here -->
+      </div>
       <?php
         require_once("cmp/footer.php");
       ?>

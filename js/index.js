@@ -1,7 +1,13 @@
+var logged_id = $("#logged_id").val(),
+    logged_username = $("#logged_username").val(),
+    logged_balance = parseInt($("#logged_balance").val()),
+    total_product = 0,
+    total_product_add_to_cart = 0,
+    productArray = new Array(),
+    paginationIndex = 1,
+    paginationItemPerIndex = 3,
+    paginationGroup;
 $(() => {
-    var logged_id = $("#logged_id").val(),
-        logged_username = $("#logged_username").val(),
-        logged_balance = parseInt($("#logged_balance").val());
     // If some username is log in
     if(logged_username){
         $("#username_logged_view").html('<i class="fas fa-user"></i> ' + logged_username);
@@ -17,6 +23,8 @@ $(() => {
             $("#username_signup").focus();
         });
     }
+    // Load all products from the Shop API
+    fetchAllProductAsync();
 });
 /* This function will update the text in the tips div the the text and the css */
 function updateTips(tips, text) {
@@ -47,11 +55,13 @@ function checkRegexp(tips, o, regexp, n, tips) {
         return true;
     }
 }
+/* This function will load the logged user info into the change my info modal */
 loadMyInfo = () => {
     $("#username_changed").val($("#logged_username").val());
     $("#password_changed").val($("#logged_password").val());
     $("#balance_changed").val('$' + $("#logged_balance").val());
 }
+/* This function will validate the log in username and password and call the login async function */
 login = () => {
     var username_login = $("#username_login"),
         password_login = $("#password_login"),
@@ -89,6 +99,7 @@ login = () => {
         }
     }
 }
+/* This async function will call the shop api and perfom the log in action */
 loginAsync = () => {
     var tips = $("#login_state");
     tips.html("<img src='img/loader.gif' />");
@@ -118,6 +129,7 @@ loginAsync = () => {
         }
     });
 }
+/* This function will validate the sign up username and password and call the sign up async function */
 signup = () => {
     var username_signup = $("#username_signup"),
         password_signup = $("#password_signup"),
@@ -155,6 +167,7 @@ signup = () => {
         }
     }
 }
+/* This async function will call the shop api and perfom the sign up action */
 signupAsync = () => {
     var tips = $("#signup_state");
     tips.html("<img src='img/loader.gif' />");
@@ -185,6 +198,7 @@ signupAsync = () => {
         }
     });
 }
+/* This function will validate the change my info username and password and call the change my info async function */
 changeMyInfo = () => {
     var username_changed = $("#username_changed"),
         password_changed = $("#password_changed"),
@@ -222,6 +236,7 @@ changeMyInfo = () => {
         }
     }
 }
+/* This async function will call the shop api and perfom the change my info action */
 changeMyInfoAsync = () => {
     var tips = $("#change_my_info_state");
     tips.html("<img src='img/loader.gif' />");
@@ -252,7 +267,8 @@ changeMyInfoAsync = () => {
         }
     });
 }
-function exit() {
+/* This async function will call the shop api and perfom the log out action */
+logoutAsync = () => {
     var tips = $("#exit_state");
     tips.html("<img src='img/loader.gif' />");
     $.post("backend/api/shop.php?action=logOutClient",
@@ -274,6 +290,160 @@ function exit() {
         }
         else{
             updateTips(tips, data);
+        }
+    });
+}
+/* This async function will call the shop api and perfom the fetchAllProductFrontEnd action */
+fetchAllProductAsync = () =>{
+    $.post("backend/api/shop.php?action=fetchAllProductFrontEnd",
+    { },
+    (data, status) => {
+        if(status == "success"){
+            try {
+                var r = JSON.parse(data),
+                    products = r.data;
+                $.each(products, (i, product) => {
+                    productArray[i] = new Product(product.id, product.name, product.price, product.unit, product.quantity);
+                    total_product++;
+                });
+                paginationGroup = Math.ceil(total_product/paginationItemPerIndex);
+                // Create the pagination
+                paginationCreate();
+            } catch (error) {
+                console.log(error)
+            }
+            
+        }
+        else{
+            console.log(error)
+        }
+    });
+}
+/* This function will perfome the pagination prev action */
+paginationPrev = () => {
+    if(paginationIndex > 1)
+    paginationIndex--;
+    paginationUpdate(paginationIndex);
+}
+/* This function will perfome the pagination next action */
+paginationNext = () => {
+    if(paginationIndex < paginationGroup)
+    paginationIndex++;
+    paginationUpdate(paginationIndex);
+}
+/* This function will perfome the pagination update action */
+paginationUpdate = (num) => {
+    paginationIndex = num;
+    var htmlCreated = '<nav><ul class="pagination justify-content-center"><li class="page-item"><a class="page-link" href="javascript:paginationPrev()">Previous</a></li>';
+    for(var i = 1; i <= paginationGroup; i++){
+        if(i == paginationIndex)
+            htmlCreated += '<li class="page-item active"><a class="page-link" href="javascript:paginationUpdate(' + i + ')">' + i + '</a></li>';
+        else
+            htmlCreated += '<li class="page-item"><a class="page-link" href="javascript:paginationUpdate(' + i + ')">' + i + '</a></li>';
+    }
+    htmlCreated += '<li class="page-item"><a class="page-link" href="javascript:paginationNext()">Next</a></li></ul></nav>';
+    $("#productPagination").html(htmlCreated);
+    showProductPerGroup();
+}
+/* This function will perfome the pagination create action */
+paginationCreate = () => {
+    var htmlCreated = '<nav><ul class="pagination justify-content-center"><li class="page-item"><a class="page-link" href="javascript:paginationPrev()">Previous</a></li>';
+    for(var i = 1; i <= paginationGroup; i++){
+        if(i == paginationIndex)
+            htmlCreated += '<li class="page-item active"><a class="page-link" href="javascript:paginationUpdate(' + i + ')">' + i + '</a></li>';
+        else
+            htmlCreated += '<li class="page-item"><a class="page-link" href="javascript:paginationUpdate(' + i + ')">' + i + '</a></li>';
+    }
+    htmlCreated += '<li class="page-item"><a class="page-link" href="javascript:paginationNext()">Next</a></li></ul></nav>';
+    $("#productPagination").html(htmlCreated);
+    paginationUpdate(paginationIndex);
+}
+/* This async function will load and show all products per pagination group */
+showProductPerGroup = () => {
+    $.post("backend/api/shop.php?action=fetchAllProductByGroup",
+    { 
+        offset: paginationIndex,
+        limit: paginationItemPerIndex
+    },
+    (data, status) => {
+        if(status == "success"){
+            try {
+                var r = JSON.parse(data),
+                    products = r.data,
+                    htmlCreated = '';
+                switch(products.length){
+                    case 3:
+                        $.each(products, (i, product) => {
+                            htmlCreated += '<div class="card mb-4 box-shadow">';
+                            htmlCreated += '<div class="card-header">';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.name + '</h4>';
+                            htmlCreated += '</div>';
+                            htmlCreated += '<div class="card-body">';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.price + ' / ' + product.unit + '</h1>';
+                            if (parseInt(product.quantity) > 0) 
+                                htmlCreated += '  <p>' + product.quantity + ' available in stock</p>';
+                            else
+                                htmlCreated += '  <p>Out of stock</p>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.id + ')" role="button"><i class="fas fa-star"> Rating</i></a>';
+                                htmlCreated += '<hr/>';            
+                            if (parseInt(product.quantity) > 0)
+                                htmlCreated += '<a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            htmlCreated += '</div>';
+                            htmlCreated += '</div>';
+                        });
+                        break;
+                    case 2:
+                        $.each(products, (i, product) => {
+                            htmlCreated += '<div class="card mb-4 box-shadow">';
+                            htmlCreated += '<div class="card-header">';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.name + '</h4>';
+                            htmlCreated += '</div>';
+                            htmlCreated += '<div class="card-body">';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.price + ' / ' + product.unit + '</h1>';
+                            if (parseInt(product.quantity) > 0) 
+                                htmlCreated += '  <p>' + product.quantity + ' available in stock</p>';
+                            else
+                                htmlCreated += '  <p>Out of stock</p>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.id + ')" role="button"><i class="fas fa-star"> Rating</i></a>';
+                                htmlCreated += '<hr/>';            
+                            if (parseInt(product.quantity) > 0)
+                                htmlCreated += '<a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            htmlCreated += '</div>';
+                            htmlCreated += '</div>';
+                        });
+                        htmlCreated += '<div class="card mb-4 box-shadow"></div>';
+                        break;
+                    case 1:
+                        $.each(products, (i, product) => {
+                            htmlCreated += '<div class="card mb-4 box-shadow">';
+                            htmlCreated += '<div class="card-header">';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.name + '</h4>';
+                            htmlCreated += '</div>';
+                            htmlCreated += '<div class="card-body">';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.price + ' / ' + product.unit + '</h1>';
+                            if (parseInt(product.quantity) > 0) 
+                                htmlCreated += '  <p>' + product.quantity + ' available in stock</p>';
+                            else
+                                htmlCreated += '  <p>Out of stock</p>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.id + ')" role="button"><i class="fas fa-star"> Rating</i></a>';
+                                htmlCreated += '<hr/>';            
+                            if (parseInt(product.quantity) > 0)
+                                htmlCreated += '<a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            htmlCreated += '</div>';
+                            htmlCreated += '</div>';
+                        });
+                        htmlCreated += '<div class="card mb-4 box-shadow"></div>';
+                        htmlCreated += '<div class="card mb-4 box-shadow"></div>';
+                        break;
+                }
+                $("#productContent").html(htmlCreated);
+            } catch (error) {
+                console.log(error)
+            }
+            
+        }
+        else{
+            console.log(error)
         }
     });
 }

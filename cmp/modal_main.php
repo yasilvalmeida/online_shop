@@ -71,7 +71,7 @@
             <div id="exit_state" class="d-flex justify-content-center" role="alert"></div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">No</button>
-                <a class="btn btn-danger" href="javascript:exit()">Yes</a>
+                <a class="btn btn-danger" href="javascript:logoutAsync()">Yes</a>
             </div>
         </div>
     </div>

@@ -23,3 +23,4 @@
 <script src="js/toastr.js"></script>
 <!-- All required functionability for the shop -->
 <script src="js/index.js"></script>
+<script src="js/product.js"></script>
