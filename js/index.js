@@ -1,4 +1,4 @@
-var logged_id = $("#logged_id").val(),
+var t_client_fk = $("#logged_id").val(),
     logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest',
     logged_balance = parseInt($("#logged_balance").val()),
     total_product = 0,
@@ -6,9 +6,11 @@ var logged_id = $("#logged_id").val(),
     paginationIndex = 1,
     paginationItemPerIndex = 3,
     paginationGroup,
-    product_id,
+    t_product_fk,
+    t_shipping_fk,
     cartTotalPrice = 0,
-    cartShippingCost = 0;
+    cartShippingCost = -1,
+    shi
 $(() => {
     // If some username is log in
     if(logged_username != 'Guest'){
@@ -251,7 +253,7 @@ changeMyInfoAsync = () => {
     tips.html("<img src='img/loader.gif' />");
     $.post("backend/api/shop.php?action=changeLoggedClientInfo",
     {
-        id: $("#logged_id").val(),
+        id: $("#t_client_fk").val(),
         username: $("#username_changed").val(),
         password: $("#password_changed").val()
     },
@@ -490,7 +492,7 @@ loadProductPerGroupAsync = () => {
 /* This function will check if there's some browser cookie create for this product will show the rating saved else will add new rating */
 ratingProduct = (id) => {
     $("#ratingContent").html("<img src='img/loader.gif' />");
-    product_id = id;
+    t_product_fk = id;
     var cookieName = 'product_rated' + id,
     cookieValueStored = getCookie(cookieName);
     // Check if there was any previous rating for this product id that includes this logged username
@@ -529,7 +531,7 @@ insertRatingAsync = () => {
     tips.html("<img src='img/loader.gif' />");
     $.post("backend/api/shop.php?action=insertRating",
     {
-        t_product_fk: product_id,
+        t_product_fk: t_product_fk,
         username: logged_username,
         rate: $("#rate").val()
     },
@@ -539,7 +541,7 @@ insertRatingAsync = () => {
                 var r = JSON.parse(data);
                 if(parseInt(r.result) != NaN && parseInt(r.result) == 1){
                     tips.html("New rating inserted!");
-                    var cookieName = 'product_rated' + product_id,
+                    var cookieName = 'product_rated' + t_product_fk,
                         cookieValueStored = getCookie(cookieName);
                     // Check if this product was rated by some other client to add previous rating
                     if(cookieValueStored) {
@@ -568,7 +570,7 @@ insertRatingAsync = () => {
 loadRatingAsync = () => {
     $.post("backend/api/shop.php?action=fetchAllRating",
     { 
-        t_product_fk: product_id
+        t_product_fk: t_product_fk
     },
     (data, status) => {
         if(status == "success"){
@@ -690,11 +692,12 @@ loadShippingMethodAsynt = () => {
                     htmlCreated = '<option id="-1">Please select</option>';
                 $.each(shippings, (i, shipping) => {
                     var shipping = new Shipping(shipping[0], shipping[1], shipping[2]);
-                    htmlCreated += '<option value="' + shipping.getPrice() + '" >' + shipping.getName() + '</option>';
+                    htmlCreated += '<option value="' + shipping.getId() + '_' + shipping.getPrice() + '" >' + shipping.getName() + ' - ' + formatPrice(shipping.getPrice()) + ' $</option>';
                 });
                 $("#shippingMethodContent").html(htmlCreated);
                 $("#shippingMethodContent").change(() => {
-                    cartShippingCost = $("#shippingMethodContent option:selected").val();
+                    cartShippingCost = $("#shippingMethodContent option:selected").val().split('_')[1];
+                    t_shipping_fk = $("#shippingMethodContent option:selected").val().split('_')[0];
                     updateCartPrice();
                 });
             } catch (error) {
@@ -753,36 +756,70 @@ removeProductFromCart = (id) => {
 }
 /* This async function will perform the buy action and generate an paid order */
 buyAsync = () => {
-    console.log('Perform the buy action')
-    // $.post("backend/api/shop.php?action=fetchAllRating",
-    // { 
-    //     t_product_fk: product_id
-    // },
-    // (data, status) => {
-    //     if(status == "success"){
-    //         try {
-    //             var r = JSON.parse(data),
-    //                 ratings = r.data,
-    //                 totalRating = ratings.length,
-    //                 sumRating = 0,
-    //                 htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Username</th><th scope="col">Date</th><th scope="col">Rating</th></tr></thead><tbody>';
-    //             $.each(ratings, (i, rating) => {
-    //                 var username = rating[0],
-    //                     date = rating[1],
-    //                     rate = rating[2];
-    //                 sumRating += parseInt(rate);
-    //                 htmlCreated += '<tr><td>' + username + '</td><td>' + date + '</td><td>' + convertRateToStars(rate) + '</td></tr>';
-    //             });
-    //             htmlCreated += '</tbody></table><hr/><h6>Average rating = ' + ((parseFloat(sumRating))/parseFloat(totalRating)) + '</h6>';
-    //             $("#ratingContent").html(htmlCreated);
-    //             $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>');
-    //         } catch (error) {
-    //             console.log(error)
-    //         }
-            
-    //     }
-    //     else{
-    //         console.log(error)
-    //     }
-    // });
+    console.log(getProductIdAndQuantity())
+    if(t_client_fk){
+        if(t_shipping_fk){
+            $("#cart_state").html("<img src='img/loader.gif' />");
+            $.post("backend/api/shop.php?action=insertOrder",
+            { 
+                t_client_fk: t_client_fk,
+                t_shipping_fk: t_shipping_fk,
+                productQuantityArray: getProductIdAndQuantity()
+            },
+            (data, status) => {
+                if(status == "success"){
+                    try {
+                        var r = JSON.parse(data);
+                        if(parseInt(r.result) != NaN && parseInt(r.result) == 1){
+                            tips.html("New order processed!");
+                            // Check if this product was rated by some other client to add previous rating
+                            cleanCart();
+                            toastr.success("New order processed!");
+                            $("#cart_modal").modal('hide');
+                        }
+                        else{
+                            updateTips(tips, r.result);
+                        }
+                    } catch (error) {
+                        console.log(error)
+                    }
+                    
+                }
+                else{
+                    console.log(error)
+                }
+            });
+        }
+        else {
+            $("#cart_state").html("Please select the shipping method!");
+        }
+    }
+    else {
+        setTimeout(() => {
+            $("#cart_modal").modal('hide');
+        }, 2000);
+        $("#cart_state").html("You must log in first!");
+        toastr.error("You must log in first!");
+    }
+}
+/* This function will clean the products in cookie and update cart  */
+cleanCart = () => {
+    var cookieName = "product_added";
+    for(var i = 0; i < total_product; i++)
+        delCookie(cookieName + i);
+    refreshCartFromCookie();
+}
+/* This function will extract all cart itens to an array of product id and quantity */
+getProductIdAndQuantity = () => {
+    var productIdAndQuantity = [];
+    for(var i = 0; i < total_product; i++) {
+        var id = productArray[i]['id'],
+            cookieName = "product_added" + id,
+            cookieValueStored = getCookie(cookieName);
+        if(cookieValueStored) {
+            productIdAndQuantity.push({ 't_product_fk' : id, 'quantity' : cookieValueStored });
+        }
+    }
+    console.log(productIdAndQuantity.length)
+    return productIdAndQuantity;
 }

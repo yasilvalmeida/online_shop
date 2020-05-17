@@ -160,6 +160,8 @@
                         </tfoot>
                     </table>
                 </div>
+                <hr />
+                <div id="cart_state" class="d-flex justify-content-center" role="alert"></div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>

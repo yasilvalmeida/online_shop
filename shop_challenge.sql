@@ -32,7 +32,6 @@ create table t_product(
 
 create table t_order(
     id bigint not null auto_increment,
-    number varchar(5) not null,
     date date not null,
     t_client_fk int not null,
     t_shipping_fk tinyint not null,
