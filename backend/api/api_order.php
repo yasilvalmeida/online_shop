@@ -20,15 +20,16 @@
                     );
                     // Select all orders
                     $query = "
-                            select o.id, o.date, s.name as shipping, round(sum(i.quantity*p.price), 2) as total
-                            from t_order o 
-                            inner join t_shipping s 
+                            select o.id, o.date, s.name as shipping, round(sum(p.price*i.quantity), 2) as total
+                            from t_order o
+                            inner join t_shipping s
                             on o.t_shipping_fk = s.id
                             inner join t_item i
                             on o.id = i.t_order_fk
                             inner join t_product p
                             on i.t_product_fk = p.id
                             where o.t_client_fk = :t_client_fk
+                            group by o.id, o.date, s.name;
                             ";
                     // Create object to connect to MySQL using PDO
                     $mysqlPDO = new MySQLPDO();
@@ -100,15 +101,16 @@
                     );
                     // Select all orders
                     $query = "
-                            select o.id, o.date, s.name as shipping, round(sum(i.quantity*p.price), 2) as total
-                            from t_order o 
-                            inner join t_shipping s 
+                            select o.id, o.date, s.name as shipping, round(sum(p.price*i.quantity), 2) as total
+                            from t_order o
+                            inner join t_shipping s
                             on o.t_shipping_fk = s.id
                             inner join t_item i
                             on o.id = i.t_order_fk
                             inner join t_product p
                             on i.t_product_fk = p.id
                             where o.t_client_fk = :t_client_fk
+                            group by o.id, o.date, s.name;
                             ";
                     // Create object to connect to MySQL using PDO
                     $mysqlPDO = new MySQLPDO();

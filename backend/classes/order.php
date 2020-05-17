@@ -15,7 +15,7 @@
             $this->id       = $data['id'];
             $this->date     = $data['date'];
             $this->shipping = $data['shipping'];
-            $this->total    = isset($data['total']) ? $data['total'] : 0;
+            $this->total    = $data['total'];
         }
         // Get Id
         function getId()

@@ -864,6 +864,7 @@ loadMyOrder = () => {
         t_client_fk: t_client_fk
     },
     (data, status) => {
+        console.log(data)
         if(status == "success"){
             try {
                 var r = JSON.parse(data),
