@@ -1,6 +1,6 @@
 var t_client_fk = $("#logged_id").val(),
     logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest',
-    logged_balance = parseInt($("#logged_balance").val()),
+    logged_balance = parseFloat($("#logged_balance").val()),
     total_product = 0,
     productArray = new Array(),
     paginationIndex = 1,
@@ -68,7 +68,7 @@ function checkRegexp(tips, o, regexp, n, tips) {
 loadMyInfo = () => {
     $("#username_changed").val($("#logged_username").val());
     $("#password_changed").val($("#logged_password").val());
-    $("#balance_changed").val('$' + $("#logged_balance").val());
+    $("#balance_changed").val(formatPrice(parseFloat($("#logged_balance").val())) + ' $');
 }
 /* This function will validate the log in username and password and call the login async function */
 login = () => {
@@ -781,6 +781,7 @@ buyAsync = () => {
                         try {
                             var r = JSON.parse(data);
                             if(parseInt(r.result) != NaN && parseInt(r.result) == 1){
+                                $("#logged_balance").val(logged_balance -= cartFinishedPrice);
                                 tips.html("New order processed!");
                                 // Check if this product was rated by some other client to add previous rating
                                 cleanCart();

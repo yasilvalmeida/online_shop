@@ -122,8 +122,23 @@
                         // Execute the query with passed parameter username, date and rate
                         $statement->execute($form_data);
                         // Check if any affected row
-                        if ($statement->rowCount()) 
-                            $data[] = array('result' => '1');
+                        if ($statement->rowCount()) {
+                            // Create session
+                            session_start();
+                            // Check for open session
+                            if(isset($_SESSION['views']))
+                            {
+                                // Update new logged client info into session 
+                                $clientBalanceStoredIntoSession = $_SESSION[$_SESSION['views'].'balance'];
+                                $_SESSION[$_SESSION['views'].'balance'] = $clientBalanceStoredIntoSession - $_POST["totalPrice"];
+                                // data[] is a associative array that return json
+                                $data[] = array('result' => '1');
+                            }
+                            else
+                            {
+                                $data[] = array('result' => 'No such session available!');
+                            }
+                        }
                         else
                             $data[] = array('result' => 'Error update client balance');
                     } 
