@@ -23,6 +23,9 @@ $(() => {
             $("#username_signup").focus();
         });
     }
+    $('#cart_modal').on('shown.bs.modal', () => {
+        loadItensToCart();
+    });
     // Load all products from the Shop API
     fetchAllProductAsync();
     // delCookie('product_added1');
@@ -636,7 +639,7 @@ addToCart = (id) => {
     refreshCartFromCookie();
     toastr.success(quantityEnterByClient + ' itens added to cart!');
 }
-/* This function will refresh the cart from cookie */
+/* This function will refresh number of itens to the cart from cookie */
 refreshCartFromCookie = () => {
     var totalItensInCart = 0;
     for(var i = 0; i < total_product; i++){
@@ -648,4 +651,58 @@ refreshCartFromCookie = () => {
         }
     }
     $("#item_added_to_cart_text").html(totalItensInCart);
+}
+/* This function will load itens to the cart from cookie */
+loadItensToCart = () => {
+    var totalToPay = 0,
+        htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Product</th><th scope="col">Qty</th><th scope="col">$ / Unit</th><th scope="col">$ Total</th></tr></thead><tbody>';
+    for(var i = 0; i < total_product; i++){
+        var id = productArray[i]['id'],
+            name = productArray[i]['name'],
+            price = parseFloat(productArray[i]['price']),
+            cookieName = 'product_added' + id,
+            cookieValueStored = parseInt(getCookie(cookieName));
+        if (cookieValueStored) {
+            var priceTimesQuantity = price * cookieValueStored;
+            totalToPay += priceTimesQuantity;
+            htmlCreated += '<tr><td><b>' + name + '</b></td><td>' + cookieValueStored + '</td><td>$' + price + '</td><td>$' + priceTimesQuantity + '</td></tr>';
+        }
+    }
+    htmlCreated += '</tbody><tfoot><tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col">$' + totalToPay + '</th></tr></tfoot></table>';
+    $("#cartContent").html(htmlCreated);
+    $("#cart_modal").modal('show');
+}
+/* This async function will perform the buy action and generate an paid order */
+buyAsync = () => {
+    $.post("backend/api/shop.php?action=fetchAllRating",
+    { 
+        t_product_fk: product_id
+    },
+    (data, status) => {
+        if(status == "success"){
+            try {
+                var r = JSON.parse(data),
+                    ratings = r.data,
+                    totalRating = ratings.length,
+                    sumRating = 0,
+                    htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Username</th><th scope="col">Date</th><th scope="col">Rating</th></tr></thead><tbody>';
+                $.each(ratings, (i, rating) => {
+                    var username = rating[0],
+                        date = rating[1],
+                        rate = rating[2];
+                    sumRating += parseInt(rate);
+                    htmlCreated += '<tr><td>' + username + '</td><td>' + date + '</td><td>' + convertRateToStars(rate) + '</td></tr>';
+                });
+                htmlCreated += '</tbody></table><hr/><h6>Average rating = ' + ((parseFloat(sumRating))/parseFloat(totalRating)) + '</h6>';
+                $("#ratingContent").html(htmlCreated);
+                $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>');
+            } catch (error) {
+                console.log(error)
+            }
+            
+        }
+        else{
+            console.log(error)
+        }
+    });
 }
