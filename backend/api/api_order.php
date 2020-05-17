@@ -116,11 +116,18 @@
                     // Check if any affected row
                     if ($statement->rowCount())
                     {
+                        // Get the t_client_fk and t_shipping_fk from POST request to insert
+                        $form_data = array(
+                            ':t_client_fk'   => $_POST["t_client_fk"], 
+                            ':t_shipping_fk' => $_POST["t_shipping_fk"]
+                        );
                         // Create a SQL query to insert an order with a new username, date and rate
                         $query = "
                                 select id
                                 from t_order
-                                where date = :date and t_client_fk  = :t_client_fk and t_shipping_fk = :t_shipping_fk;
+                                where t_client_fk = :t_client_fk and t_shipping_fk = :t_shipping_fk
+                                order by id DESC
+                                limit 1
                                 ";
                         // Prepare the query 
                         $statement = $mysqlPDO->getConnection()->prepare($query);
@@ -131,7 +138,7 @@
                         // Foreach row in array
                         if (isset($row)) 
                         {
-                            $t_order_fk = $row["id"];
+                            $t_order_fk = $row['id'];
                             // Create a SQL query to insert an order with a new username, date and rate
                             $query = "
                                         insert t_item(quantity, t_product_fk, t_order_fk) 
@@ -177,7 +184,7 @@
                                     $clientBalanceStoredIntoSession = $_SESSION[$_SESSION['views'].'balance'];
                                     $_SESSION[$_SESSION['views'].'balance'] = $clientBalanceStoredIntoSession - $_POST["totalPrice"];
                                     // data[] is a associative array that return json
-                                    $data[] = array('result' => $t_order_fk);
+                                    $data[] = array('result' => '1');
                                 }
                                 else
                                 {

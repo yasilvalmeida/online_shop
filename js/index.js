@@ -31,6 +31,7 @@ $(() => {
         $("#cartContent").html("<img src='img/loader.gif' />");
         loadItensToCart(); 
     });
+    console.log(document.cookie)
     // Load all products from the Shop API
     fetchAllProductAsync();
 });
@@ -308,6 +309,7 @@ fetchAllProductAsync = () =>{
     $.post("backend/api/shop.php?action=fetchAllProductFrontEnd",
     { },
     (data, status) => {
+        console.log(data)
         if(status == "success"){
             try {
                 var r = JSON.parse(data),
