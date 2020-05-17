@@ -177,7 +177,7 @@
                                     $clientBalanceStoredIntoSession = $_SESSION[$_SESSION['views'].'balance'];
                                     $_SESSION[$_SESSION['views'].'balance'] = $clientBalanceStoredIntoSession - $_POST["totalPrice"];
                                     // data[] is a associative array that return json
-                                    $data[] = array('result' => '1');
+                                    $data[] = array('result' => $t_order_fk);
                                 }
                                 else
                                 {

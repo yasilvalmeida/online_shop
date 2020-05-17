@@ -654,11 +654,9 @@ formatPrice = (price) => {
             decimalPart = parts[1],
             integerPart = (integerPart < 1000) ? integerPart : processPrice(integerPart),
             decimalPart = (!decimalPart) ? '00' : completePriceDecimalPart(decimalPart);
-        console.log(priceStringWithTwoPlacedDigits)
         return integerPart + ',' + decimalPart;
     }
     catch(error){
-        console.log(price)
         console.log(error);
     }
 }
@@ -744,7 +742,6 @@ updateCartItens = () => {
                 price = parseFloat(productArray[i]['price']).toFixed(2),
                 priceTimesQuantity = parseFloat(price * cookieValueStored).toFixed(2);
                 _cartTotalPrice += parseFloat(priceTimesQuantity);
-                console.log('up=' + price + ', tp=' + priceTimesQuantity + ', sp=' + _cartTotalPrice);
             htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center">' + cookieValueStored + '</div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
         }
     }

@@ -29,7 +29,7 @@
       <nav class="my-2 my-md-0 mr-md-3">
         <ul class="nav nav-pills">
           <li class="nav-item">
-            <a class="nav-link active" href="index.php">Products</a>
+            <a class="nav-link active" href="#">Products</a>
           </li>
           <?php
             require_once("cmp/user_area.php");
