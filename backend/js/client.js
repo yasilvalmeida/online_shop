@@ -24,7 +24,7 @@ $(() => {
             }
         },
         columnDefs: [
-            { orderable: false, targets: [3, 4, 5] }
+            { orderable: false, targets: [4, 5, 6] }
         ]
     });
     /* This function will update the text in the tips div the the text and the css */

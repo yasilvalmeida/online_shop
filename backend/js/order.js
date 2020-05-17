@@ -19,7 +19,6 @@ $(() => {
             console.log(data);
         }
     });
-
     order_data_table = $('#dataTable').DataTable({
         "processing": true,
         "serverSide": false,
@@ -27,7 +26,7 @@ $(() => {
         "ajax": {
             url: "api/shop.php?action=fetchAllOrder",
             type: "POST",
-            data: { }
+            data: { t_client_fk: $("#cid").val() }
         },
         "oLanguage": {
             "sLengthMenu": "Show _MENU_ rows per page",
@@ -44,10 +43,9 @@ $(() => {
             }
         },
         columnDefs: [
-            { orderable: false, targets: [4, 5] }
+            { orderable: false, targets: [4] }
         ]
     });
-    
     /* This function will update the text in the tips div the the text and the css */
     function updateTips(tips, text) {
         tips
@@ -64,6 +62,7 @@ function updateTips(tips, text) {
         .addClass("alert-danger");
 }
 function remove(id) {
+    var tips = $("#remove_state");
     $("#id_to_remove").val(id);
     tips.addClass("alert-light");
     $("#remove_modal").modal('show');

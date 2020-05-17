@@ -647,12 +647,20 @@ loadItensToCart = () => {
 }
 /* This function will format the price adding the decimal part if need 1000,00 $*/
 formatPrice = (price) => {
-    var parts = (price + '').split('.'),
-        integerPart = parts[0],
-        decimalPart = parts[1],
-        integerPart = (integerPart < 1000) ? integerPart : processPrice(integerPart),
-        decimalPart = (!decimalPart) ? '00' : completePriceDecimalPart(decimalPart);
-    return integerPart + ',' + decimalPart;
+    try{
+        var priceStringWithTwoPlacedDigits = parseFloat(price + '').toFixed(2),
+            parts = (priceStringWithTwoPlacedDigits + '').split('.'),
+            integerPart = parts[0],
+            decimalPart = parts[1],
+            integerPart = (integerPart < 1000) ? integerPart : processPrice(integerPart),
+            decimalPart = (!decimalPart) ? '00' : completePriceDecimalPart(decimalPart);
+        console.log(priceStringWithTwoPlacedDigits)
+        return integerPart + ',' + decimalPart;
+    }
+    catch(error){
+        console.log(price)
+        console.log(error);
+    }
 }
 /* This function will process recursively the space between thousands in integer part */
 processPrice = (price) => {
@@ -733,9 +741,10 @@ updateCartItens = () => {
         if (cookieValueStored) {
             hasItem = true;
             var name = productArray[i]['name'],
-                price = parseFloat(productArray[i]['price']),
-                priceTimesQuantity = parseFloat(price * cookieValueStored);
-                _cartTotalPrice += priceTimesQuantity;
+                price = parseFloat(productArray[i]['price']).toFixed(2),
+                priceTimesQuantity = parseFloat(price * cookieValueStored).toFixed(2);
+                _cartTotalPrice += parseFloat(priceTimesQuantity);
+                console.log('up=' + price + ', tp=' + priceTimesQuantity + ', sp=' + _cartTotalPrice);
             htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center">' + cookieValueStored + '</div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
         }
     }

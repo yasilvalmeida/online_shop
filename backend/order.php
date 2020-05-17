@@ -72,11 +72,10 @@
             <table id="dataTable" class="table table-striped table-bordered table-hover display">
                 <thead>
                     <tr>
-                      <th>Number</th>
+                      <th>ID</th>
                       <th>Date</th>
                       <th>Shipping</th>
-                      <th>Total $</th>
-                      <th>Itens</th>
+                      <th><div class='span12' style='text-align:right'>Total $</div></th>
                       <th><div class='span12' style='text-align:center'>Delete</div></th>
                     </tr>
                 </thead>

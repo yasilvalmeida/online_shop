@@ -67,7 +67,8 @@
                     <tr>
                       <th>Username</th>
                       <th>Password</th>
-                      <th>Balance</th>
+                      <th>Initial Balance</th>
+                      <th>Remaining Balance</th>
                       <th><div class='span12' style='text-align:center'>Orders</div></th>
                       <th><div class='span12' style='text-align:center'>Update</div></th>
                       <th><div class='span12' style='text-align:center'>Delete</div></th>

@@ -4,7 +4,7 @@
     {
         private $id;
         private $number;
-        private $username;
+        private $total;
         private $date;
         private $shipping;
         /* 
@@ -13,25 +13,19 @@
         function __construct(array $data)
         {
             $this->id       = $data['id'];
-            $this->number   = $data['number'];
-            $this->username = $data['username'];
             $this->date     = $data['date'];
             $this->shipping = $data['shipping'];
+            $this->total    = isset($data['total']) ? $data['total'] : 0;
         }
         // Get Id
         function getId()
         {
             return $this->id;
         }
-        // Get Number
-        function getNumber()
+        // Get Total
+        function getTotal()
         {
-            return $this->number;
-        }
-        // Get Username
-        function getUsername()
-        {
-            return $this->username;
+            return $this->total;
         }
         // Get Date
         function getDate()
