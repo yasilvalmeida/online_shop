@@ -225,10 +225,15 @@
     /*********************/
 
     /* Order Action Begin */
-    // Perform fetch all orders action
-    else if($_GET["action"] == 'fetchAllOrder')
+    // Perform fetch all orders back end action
+    else if($_GET["action"] == 'fetchAllOrderBackEnd')
     {
-        $data = $onlineShopOrderAPI->fetchAllOrder();
+        $data = $onlineShopOrderAPI->fetchAllOrderBackEnd();
+    }
+    // Perform fetch all orders front end action
+    else if($_GET["action"] == 'fetchAllOrderFrontEnd')
+    {
+        $data = $onlineShopOrderAPI->fetchAllOrderFrontEnd();
     }
     // Perform remove order action
     else if($_GET["action"] == 'removeOrder')
