@@ -6,7 +6,87 @@
     class OnlineShopOrderAPI
     {
         /* Order Actions Begin */
-        /* Retrieve all order on the database */
+        /* Retrieve all order on the database to BackEnd */
+        function fetchAllOrderBackEnd()
+        {
+            try
+            {
+                /* Check if for the empty or null t_client_fk parameters */
+                if(isset($_POST["t_client_fk"]))
+                {
+                    // Get the t_client_fk and t_shipping_fk from POST request to insert
+                    $form_data = array(
+                        ':t_client_fk'   => $_POST["t_client_fk"]
+                    );
+                    // Select all orders
+                    $query = "
+                            select o.id, o.date, s.name as shipping, round(sum(i.quantity*p.price), 2) as total
+                            from t_order o 
+                            inner join t_shipping s 
+                            on o.t_shipping_fk = s.id
+                            inner join t_item i
+                            on o.id = i.t_order_fk
+                            inner join t_product p
+                            on i.t_product_fk = p.id
+                            where o.t_client_fk = :t_client_fk
+                            ";
+                    // Create object to connect to MySQL using PDO
+                    $mysqlPDO = new MySQLPDO();
+                    // Prepare the query 
+                    $statement = $mysqlPDO->getConnection()->prepare($query);
+                    // Execute the query without paramters
+                    $statement->execute($form_data);
+                    // Get affect rows in associative array
+                    $rows = $statement->fetchAll();
+                    // Foreach row in array
+                    foreach ($rows as $row) 
+                    {
+                        // Create a Order object
+                        $order = new Order($row);
+                        if(null !== $order->getId())
+                        {
+                            //Create datatable row
+                            $tmp_data[] = array
+                            (
+                                $order->getId(),
+                                $order->getDate(),
+                                $order->getShipping(),
+                                "<div class='span12' style='text-align:right'>".$order->getTotal()." $</div>",
+                                "<div class='span12' style='text-align:center'><a href='javascript:remove(".$order->getId().")' class='btn btn-danger'><i class='far fa-trash-alt'></i></a></div>"
+                            );
+                        }  
+                    }
+                    // Export into DataTable json format if there's any record in $tmp_data
+                    if(isset($tmp_data) && count($tmp_data) > 0)
+                    {
+                        $data = array
+                        (
+                            "data" => $tmp_data
+                        );
+                    }
+                    else
+                    {
+                        $data = array
+                        (
+                            "data" => array()
+                        );
+                    }
+                    return $data;
+                }
+                else
+                {
+                    // Check for missing parameters t_client_fk
+                    if(!isset($_POST["t_client_fk"]))
+                        $data[] = array('result' => 'Missing t_client_fk parameter');
+                }
+                return $data;
+            } 
+            catch (PDOException $e) 
+            {
+                die("Error message: " . $e->getMessage());
+            }
+        }
+        /* Retrieve all order on the database to BackEnd */
         function fetchAllOrder()
         {
             try

@@ -24,7 +24,7 @@ $(() => {
         "serverSide": false,
         "order": [],
         "ajax": {
-            url: "api/shop.php?action=fetchAllOrder",
+            url: "api/shop.php?action=fetchAllOrderBackEnd",
             type: "POST",
             data: { t_client_fk: $("#cid").val() }
         },

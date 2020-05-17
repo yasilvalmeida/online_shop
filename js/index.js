@@ -309,7 +309,7 @@ fetchAllProductAsync = () =>{
     $.post("backend/api/shop.php?action=fetchAllProductFrontEnd",
     { },
     (data, status) => {
-        console.log(data)
+        // console.log(data)
         if(status == "success"){
             try {
                 var r = JSON.parse(data),
@@ -832,7 +832,7 @@ buyAsync = () => {
 cleanCart = () => {
     var cookieName = "product_added";
     for(var i = 0; i < total_product; i++)
-        delCookie(cookieName + i);
+        delCookie(cookieName + productArray[i]['id']);
     refreshCartFromCookie();
 }
 /* This function will extract all cart itens to an array of product id and quantity */
