@@ -98,11 +98,15 @@
                     </div>
                     <div class="form-group">
                         <label>Initial balance</label>
-                        <input id="initial_balance_changed" type="text" disabled class="form-control form-control-user" />
+                        <input id="initial_balance" type="text" disabled class="form-control form-control-user" />
+                    </div>
+                    <div class="form-group">
+                        <label>Total purchase</label>
+                        <input id="total_purchase" type="text" disabled class="form-control form-control-user" />
                     </div>
                     <div class="form-group">
                         <label>Remaining balance</label>
-                        <input id="balance_changed" type="text" disabled class="form-control form-control-user" />
+                        <input id="balance" type="text" disabled class="form-control form-control-user" />
                     </div>
                     <hr />
                     <div id="change_my_info_state" class="d-flex justify-content-center" role="alert"></div>
@@ -189,27 +193,24 @@
                     <table class="table table-hover table-stripped">
                         <thead>
                             <tr>
-                                <th scope="col"><div style="text-align:center"><i class="far fa-trash-alt"></i></div></th>
-                                <th scope="col">Product</th>
-                                <th scope="col"><div style="text-align:center">Qty</div></th>
-                                <th scope="col"><div style="text-align:right">Unit $</div></th>
+                                <th scope="col"><div style="text-align:center">Order ID</div></th>
+                                <th scope="col"><div style="text-align:center">Date</div></th>
+                                <th scope="col"><div style="text-align:center">Shipping</div></th>
+                                <th scope="col"><div style="text-align:center">Status</div></th>
                                 <th scope="col"><div style="text-align:right">Total $</div></th>
                             </tr>
                         </thead>
-                        <tbody id="cartContent">
+                        <tbody id="orderContent">
                             <!-- Load cart footer -->
                         </tbody>
-                        <tfoot id="cartFooter">
+                        <tfoot id="orderFooter">
                             <!-- Load cart footer -->
                         </tfoot>
                     </table>
                 </div>
-                <hr />
-                <div id="cart_state" class="d-flex justify-content-center" role="alert"></div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
-                <a class="btn btn-success" href="javascript:buyAsync()">Buy</a>
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>

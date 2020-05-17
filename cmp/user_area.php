@@ -9,7 +9,7 @@
                 <div class="dropdown-menu dropdown-menu-right">
                     <div class="dropdown-divider"></div>
                     <a href="#" class="dropdown-item" data-toggle="modal" data-target="#change_modal">
-                        <i class="fas fa-id-card mr-2"></i> Change my information
+                        <i class="fas fa-id-card mr-2"></i> My Account
                     </a>
                     <div class="dropdown-divider"></div>
                     <a href="#" class="dropdown-item" data-toggle="modal" data-target="#order_modal">

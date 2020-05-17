@@ -1,5 +1,7 @@
 /* This JS file with have all needed classes for the fronted */
+
 /*************************************************************/
+
 /* This class will allow manapulate Product objects */
 /* Product Class Begin */
 class Product {
@@ -33,7 +35,9 @@ class Product {
     }
 }
 /* Product Class End */
+
 /*************************************************************/
+
 /* This class will allow manapulate Rating objects */
 /* Rating Class Begin */
 class Rating {
@@ -57,7 +61,9 @@ class Rating {
     }
 }
 /* Rating Class End */
+
 /*************************************************************/
+
 /* This class will allow manapulate Shipping Method objects */
 /* Shipping Class Begin */
 class Shipping {
@@ -78,6 +84,42 @@ class Shipping {
     /* This function will return the price */
     getPrice(){
         return this.price;
+    }
+}
+/* Shipping Class End */
+
+/*************************************************************/
+
+/* This class will allow manapulate Order objects */
+/* Order Class Begin */
+class Order {
+    /* This special function (constructor) will create a shipping method object from id, name and price */
+    constructor(id, date, shipping, totalPrice, status){
+        this.id = id;
+        this.date = date;
+        this.shipping = shipping;
+        this.totalPrice = totalPrice;
+        this.status = status;
+    }
+    /* This function will return the id */
+    getId(){
+        return this.id;
+    }
+    /* This function will return the date */
+    getDate(){
+        return this.date;
+    }
+    /* This function will return the shipping */
+    getShipping(){
+        return this.shipping;
+    }
+    /* This function will return the totalPrice */
+    getTotalPrice(){
+        return this.totalPrice;
+    }
+    /* This function will return the status */
+    getStatus(){
+        return this.status;
     }
 }
 /* Shipping Class End */

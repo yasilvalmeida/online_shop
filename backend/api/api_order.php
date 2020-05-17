@@ -131,8 +131,8 @@
                                 $order->getId(),
                                 $order->getDate(),
                                 $order->getShipping(),
-                                "<div class='span12' style='text-align:right'>".$order->getTotal()." $</div>",
-                                "<div class='span12' style='text-align:center'><a href='javascript:remove(".$order->getId().")' class='btn btn-danger'><i class='far fa-trash-alt'></i></a></div>"
+                                $order->getTotal(),
+                                'Paid'
                             );
                         }  
                     }
