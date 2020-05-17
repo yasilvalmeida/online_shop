@@ -2,7 +2,6 @@ var logged_id = $("#logged_id").val(),
     logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest',
     logged_balance = parseInt($("#logged_balance").val()),
     total_product = 0,
-    total_product_add_to_cart = 0,
     productArray = new Array(),
     paginationIndex = 1,
     paginationItemPerIndex = 3,
@@ -26,7 +25,7 @@ $(() => {
     }
     // Load all products from the Shop API
     fetchAllProductAsync();
-    // delCookie('product_rated3');
+    // delCookie('product_added1');
     console.log(document.cookie)
 });
 /* This function will update the text in the tips div the the text and the css */
@@ -305,13 +304,20 @@ fetchAllProductAsync = () =>{
             try {
                 var r = JSON.parse(data),
                     products = r.data;
+                total_product = products.length;
                 $.each(products, (i, product) => {
-                    productArray[i] = new Product(product.id, product.name, product.price, product.unit, product.quantity);
-                    total_product++;
+                    var id = product[0],
+                        name = product[1],
+                        price = product[2],
+                        unit = product[3],
+                        quantity = product[4];
+                    productArray[i] = new Product(id, name, price, unit, quantity);
                 });
                 paginationGroup = Math.ceil(total_product/paginationItemPerIndex);
                 // Create the pagination
                 paginationCreate();
+                // Refresh the cart from cookie
+                refreshCartFromCookie();
             } catch (error) {
                 console.log(error)
             }
@@ -377,48 +383,66 @@ loadProductPerGroupAsync = () => {
                 switch(products.length){
                     case 3:
                         $.each(products, (i, product) => {
+                            var id = product.id,
+                                name = product.name,
+                                price = product.price,
+                                unit = product.unit,
+                                quantity = product.quantity;
                             htmlCreated += '<div class="card mb-4 box-shadow">';
                             htmlCreated += '<div class="card-header">';
-                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.name + '</h4>';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + name + '</h4>';
                             htmlCreated += '</div>';
                             htmlCreated += '<div class="card-body">';
-                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.price + ' / ' + product.unit + '</h1>';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + price + ' / ' + unit + '</h1>';
                             // Check if product quantity > 0 to show how many is available in stock and else out of stock
-                            if (parseInt(product.quantity) > 0) 
-                                htmlCreated += '  <p>' + product.quantity + ' available in stock</p>';
+                            if (parseInt(quantity) > 0) 
+                                htmlCreated += '  <p>' + quantity + ' available in stock</p>';
                             else
                                 htmlCreated += '  <p>Out of stock</p>';
                             // Check if there's any rated cookie for this product
-                            var cookieName = 'product_rated' + product.id,
-                                cookieStored = getCookie(cookieName);
-                            if (cookieStored && cookieStored.includes(logged_username))
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.id + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
+                            var cookieName = 'product_rated' + id,
+                                cookieValueStored = getCookie(cookieName);
+                            if (cookieValueStored && cookieValueStored.includes(logged_username))
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
                             else
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.id + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
                             htmlCreated += '<hr/>';
                             // // Check if product quantity > 0 to show the button add to cart and else to hide
-                            if (parseInt(product.quantity) > 0)
-                                htmlCreated += '<a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            if (parseInt(quantity) > 0)
+                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + id + '" type="number" min="1" max="' + quantity + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
                             htmlCreated += '</div>';
                             htmlCreated += '</div>';
                         });
                         break;
                     case 2:
                         $.each(products, (i, product) => {
+                            var id = product.id,
+                                name = product.name,
+                                price = product.price,
+                                unit = product.unit,
+                                quantity = product.quantity;
                             htmlCreated += '<div class="card mb-4 box-shadow">';
                             htmlCreated += '<div class="card-header">';
-                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.name + '</h4>';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + name + '</h4>';
                             htmlCreated += '</div>';
                             htmlCreated += '<div class="card-body">';
-                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.price + ' / ' + product.unit + '</h1>';
-                            if (parseInt(product.quantity) > 0) 
-                                htmlCreated += '  <p>' + product.quantity + ' available in stock</p>';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + price + ' / ' + unit + '</h1>';
+                            // Check if product quantity > 0 to show how many is available in stock and else out of stock
+                            if (parseInt(quantity) > 0) 
+                                htmlCreated += '  <p>' + quantity + ' available in stock</p>';
                             else
                                 htmlCreated += '  <p>Out of stock</p>';
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.id + ')" role="button"><i class="fas fa-star"> Rating</i></a>';
-                                htmlCreated += '<hr/>';            
-                            if (parseInt(product.quantity) > 0)
-                                htmlCreated += '<a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            // Check if there's any rated cookie for this product
+                            var cookieName = 'product_rated' + id,
+                                cookieValueStored = getCookie(cookieName);
+                            if (cookieValueStored && cookieValueStored.includes(logged_username))
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
+                            else
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
+                            htmlCreated += '<hr/>';
+                            // // Check if product quantity > 0 to show the button add to cart and else to hide
+                            if (parseInt(quantity) > 0)
+                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + id + '" type="number" min="1" max="' + quantity + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
                             htmlCreated += '</div>';
                             htmlCreated += '</div>';
                         });
@@ -426,20 +450,33 @@ loadProductPerGroupAsync = () => {
                         break;
                     case 1:
                         $.each(products, (i, product) => {
+                            var id = product.id,
+                                name = product.name,
+                                price = product.price,
+                                unit = product.unit,
+                                quantity = product.quantity;
                             htmlCreated += '<div class="card mb-4 box-shadow">';
                             htmlCreated += '<div class="card-header">';
-                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.name + '</h4>';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + name + '</h4>';
                             htmlCreated += '</div>';
                             htmlCreated += '<div class="card-body">';
-                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.price + ' / ' + product.unit + '</h1>';
-                            if (parseInt(product.quantity) > 0) 
-                                htmlCreated += '  <p>' + product.quantity + ' available in stock</p>';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + price + ' / ' + unit + '</h1>';
+                            // Check if product quantity > 0 to show how many is available in stock and else out of stock
+                            if (parseInt(quantity) > 0) 
+                                htmlCreated += '  <p>' + quantity + ' available in stock</p>';
                             else
                                 htmlCreated += '  <p>Out of stock</p>';
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.id + ')" role="button"><i class="fas fa-star"> Rating</i></a>';
-                                htmlCreated += '<hr/>';            
-                            if (parseInt(product.quantity) > 0)
-                                htmlCreated += '<a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            // Check if there's any rated cookie for this product
+                            var cookieName = 'product_rated' + id,
+                                cookieValueStored = getCookie(cookieName);
+                            if (cookieValueStored && cookieValueStored.includes(logged_username))
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
+                            else
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
+                            htmlCreated += '<hr/>';
+                            // // Check if product quantity > 0 to show the button add to cart and else to hide
+                            if (parseInt(quantity) > 0)
+                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + id + '" type="number" min="1" max="' + quantity + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
                             htmlCreated += '</div>';
                             htmlCreated += '</div>';
                         });
@@ -582,3 +619,33 @@ convertRateToStars = (n) => {
             return '<i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>';
     }
 } 
+/* This function will add new item to cart and stored into cookie */
+addToCart = (id) => {
+    var cookieName = 'product_added' + id,
+        cookieValueStored = parseInt(getCookie(cookieName)),
+        quantityEnterByClient = parseInt($("#quantityToAdd" + id).val()),
+        sumOfItens = 0;
+    // If this product was added to cart and stored into cookie let's sum with stored quantity
+    if (cookieValueStored) {
+        sumOfItens = cookieValueStored + quantityEnterByClient;
+        delCookie(cookieName);
+    }
+    else 
+        sumOfItens = quantityEnterByClient;
+    setCookie(cookieName, sumOfItens);
+    refreshCartFromCookie();
+    toastr.success(quantityEnterByClient + ' itens added to cart!');
+}
+/* This function will refresh the cart from cookie */
+refreshCartFromCookie = () => {
+    var totalItensInCart = 0;
+    for(var i = 0; i < total_product; i++){
+        var id = productArray[i]['id'],
+            cookieName = 'product_added' + id,
+            cookieValueStored = parseInt(getCookie(cookieName));
+        if (cookieValueStored) {
+            totalItensInCart += cookieValueStored;
+        }
+    }
+    $("#item_added_to_cart_text").html(totalItensInCart);
+}
