@@ -649,14 +649,14 @@ loadItensToCart = () => {
         if (cookieValueStored) {
             var name = productArray[i]['name'],
                 price = parseFloat(productArray[i]['price']),
-                priceTimesQuantity = price * cookieValueStored;
+                priceTimesQuantity = parseFloat(price * cookieValueStored);
             cartTotalPrice += priceTimesQuantity;
             htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center">' + cookieValueStored + '</div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
         }
     }
     htmlCreated += '</tbody><tfoot><tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div style="text-align:right">' + formatPrice(cartTotalPrice) + ' $</div></th></tr></tfoot></table>';
     $("#cartContent").html(htmlCreated);
-    $("#cartFinalPrice").html(cartTotalPrice);
+    $("#cartFinalPrice").html(formatPrice(cartTotalPrice))
     $("#cart_modal").modal('show');
 }
 /* This function will format the price adding the decimal part if need 1000,00 $*/
@@ -664,24 +664,35 @@ formatPrice = (price) => {
     var parts = (price + '').split('.'),
         integerPart = parts[0],
         decimalPart = parts[1],
-        integerPart = (integerPart >= 1000) ? processPrice(integerPart) : integerPart,
-        decimalPart = (!decimalPart) ? '00' : completePrice(decimalPart);
+        integerPart = (integerPart < 1000) ? integerPart : processPrice(integerPart),
+        decimalPart = (!decimalPart) ? '00' : completePriceDecimalPart(decimalPart);
     return integerPart + ',' + decimalPart;
 }
 /* This function will process recursively the space between thousands in integer part */
 processPrice = (price) => {
-    if (price < 1000)
-        return (price);
+    if (price < 1000) return (price);
     else {
         var quotient = parseInt(price / 1000),
             remainder = parseInt(price % 1000);
-        console.log(quotient)
-        console.log(remainder)
-        return quotient + " " + remainder;
+        return processPrice(quotient) + " " + completePriceRemainder(remainder);
     }
 }
-/* This function will complete the decimal part with 0 if the lenght == 1 or return the decimalPart */
-completePrice = (decimalPart) => {
+/* This function will complete the remainder digits until complete three digits */
+completePriceRemainder = (remainder) => {
+    if(remainder == 0){
+        console.log('r=' + remainder + ', rl=' + (remainder + '').length)
+    }
+    switch((remainder + '').length){
+        case 3:
+            return remainder;
+        case 2:
+            return '0' + remainder;
+        case 1: 
+            return '00' + remainder;
+    }
+}
+/* This function will complete the decimal part with 0 until complete two digits */
+completePriceDecimalPart = (decimalPart) => {
     return (decimalPart.length == 1) ? decimalPart + "0" : decimalPart;
 }
 /* This async function will load shipping method from the database using Shop API */
