@@ -62,8 +62,8 @@
         {
             try
             {
-                /* Check if for the empty or null t_client_fk, date and rate parameters */
-                if(isset($_POST["t_client_fk"]) && isset($_POST["t_shipping_fk"]) && isset($_POST["itens"]))
+                /* Check if for the empty or null t_client_fk, t_shipping_fk, itens and totalPrice parameters */
+                if(isset($_POST["t_client_fk"]) && isset($_POST["t_shipping_fk"]) && isset($_POST["itens"]) && isset($_POST["totalPrice"]))
                 {
                     // Get the t_client_fk and t_shipping_fk from POST request to insert
                     $form_data = array(
@@ -95,7 +95,7 @@
                         // Foreach item
                         foreach($itens as $item)
                         {
-                            // Get the item info
+                            // Get the item info from the $item in $_POST['item']
                             $form_data = array(
                                 ':t_product_fk' => $item['t_product_fk'],
                                 ':quantity'     => $item['quantity'],
@@ -106,7 +106,26 @@
                             // Execute the query with passed parameter username, date and rate
                             $statement->execute($form_data);
                         }
-                        $data[] = array('result' => '1');
+                        // Get the t_client_fk and clientBalance to update the actual balance
+                        $form_data = array(
+                            ':t_client_fk'    => $_POST["t_client_fk"], 
+                            ':totalPrice'     => $_POST["totalPrice"]
+                        );
+                        // Create a SQL query to insert an order with a new username, date and rate
+                        $query = "
+                                    update t_client
+                                    set balance = balance - :totalPrice
+                                    where id = :t_client_fk
+                                ";
+                        // Prepare the query 
+                        $statement = $mysqlPDO->getConnection()->prepare($query);
+                        // Execute the query with passed parameter username, date and rate
+                        $statement->execute($form_data);
+                        // Check if any affected row
+                        if ($statement->rowCount()) 
+                            $data[] = array('result' => '1');
+                        else
+                            $data[] = array('result' => 'Error update client balance');
                     } 
                     else
                     {
@@ -115,15 +134,17 @@
                 }
                 else
                 {
-                    // Check for missing parameters
-                    if(!isset($_POST["t_client_fk"]) && !isset($_POST["t_shipping_fk"]) && !isset($_POST["rate"]))
+                    // Check for missing parameters t_client_fk, t_shipping_fk, itens and totalPrice
+                    if(!isset($_POST["t_client_fk"]) && !isset($_POST["t_shipping_fk"]) && !isset($_POST["itens"]) && !isset($_POST["totalPrice"]))
                         $data[] = array('result' => 'Missing all parameters for insert an new order!');
                     else if(!isset($_POST["t_client_fk"]))
                         $data[] = array('result' => 'Missing t_client_fk parameter');
                     else if(!isset($_POST["t_shipping_fk"]))
                         $data[] = array('result' => 'Missing t_shipping_fk parameter');
-                    else
+                    else if(!isset($_POST["itens"]))
                         $data[] = array('result' => 'Missing itens parameter');
+                    else
+                        $data[] = array('result' => 'Missing totalPrice parameter');
                 }
                 return $data;
             } 

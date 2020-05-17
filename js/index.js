@@ -772,9 +772,11 @@ buyAsync = () => {
                 { 
                     t_client_fk: t_client_fk,
                     t_shipping_fk: t_shipping_fk,
-                    itens: getProductIdAndQuantity()
+                    itens: getProductIdAndQuantity(),
+                    totalPrice: cartFinishedPrice
                 },
                 (data, status) => {
+                    console.log(data)
                     if(status == "success"){
                         try {
                             var r = JSON.parse(data);
