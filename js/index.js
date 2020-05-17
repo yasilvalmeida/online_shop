@@ -864,7 +864,6 @@ loadMyOrder = () => {
         t_client_fk: t_client_fk
     },
     (data, status) => {
-        console.log(data)
         if(status == "success"){
             try {
                 var r = JSON.parse(data),
@@ -873,9 +872,10 @@ loadMyOrder = () => {
                     totalPurchasePrice = 0;
                     $.each(orders, (i, order) => {
                         var order = new Order(order[0], order[1], order[2], order[3], order[4]);
-                        totalPurchasePrice += order.getTotalPrice();
+                        totalPurchasePrice += parseFloat(order.getTotalPrice());
                         htmlCreated += '<tr><td scope="col"><div style="text-align:center">' + order.getId() + '</div></td><td scope="col"><div style="text-align:center">' + order.getDate() + '</div></td><td scope="col"><div style="text-align:center">' + order.getShipping() + '</div></td><td scope="col"><div style="text-align:center">' + order.getStatus() + '</div></td><td scope="col"><div style="text-align:right">' + formatPrice(order.getTotalPrice()) + ' $</div></td></tr>';
                     });
+                console.log(totalPurchasePrice)
                 $("#orderContent").html(htmlCreated);
                 htmlCreated = '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col">Total Purchase</th><th scope="col"><div style="text-align:right">' + formatPrice(totalPurchasePrice) + ' $</div></th></tr>';
                 $("#orderFooter").html(htmlCreated);
