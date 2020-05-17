@@ -34,8 +34,6 @@ $(() => {
     });
     // Load all products from the Shop API
     fetchAllProductAsync();
-    // delCookie('product_added1');
-    console.log(document.cookie)
 });
 /* This function will update the text in the tips div the the text and the css */
 function updateTips(tips, text) {
@@ -725,25 +723,31 @@ updateCartPrice = () => {
 }
 /* This function will update the itens in cart when removed */
 updateCartItens = () => {
-    var htmlCreated = '';
+    var htmlCreated = '',
+        _cartTotalPrice = 0,
+        hasItem = false;
     for(var i = 0; i < total_product; i++){
         var id = productArray[i]['id'],
             cookieName = 'product_added' + id,
             cookieValueStored = parseInt(getCookie(cookieName));
         if (cookieValueStored) {
+            hasItem = true;
             var name = productArray[i]['name'],
                 price = parseFloat(productArray[i]['price']),
                 priceTimesQuantity = parseFloat(price * cookieValueStored);
-            cartTotalPrice += priceTimesQuantity;
+                _cartTotalPrice += priceTimesQuantity;
             htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center">' + cookieValueStored + '</div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
         }
     }
-    htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div style="text-align:right">' + formatPrice(cartTotalPrice) + ' $</div></th></tr>';
+    htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div style="text-align:right">' + formatPrice(_cartTotalPrice) + ' $</div></th></tr>';
     $("#cartContent").html(htmlCreated);
     htmlCreated  = '<tr><th colspan="2" scope="col"><label style="margin-top: 5px;">Shipping method</label></th><th colspan="2" scope="col"><select id="shippingMethodContent" class="form-control"></select></th><th scope="col"><div id="cartShippingPrice" style="text-align:right"></div></th></tr>';
     htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div id="cartFinalPrice" style="text-align:right"></div></th></tr>';
-    $("#cartFooter").html(htmlCreated);
+    $("#cartFooter").html(htmlCreated); 
+    cartTotalPrice = _cartTotalPrice;
     updateCartPrice();
+    if(!hasItem)
+        $("#cart_modal").modal('hide');
 }
 /* This function will remove the product from cookie and update the cart */
 removeProductFromCart = (id) => {
@@ -752,19 +756,20 @@ removeProductFromCart = (id) => {
     if(cookieValueStored) {
         delCookie(cookieName);
         updateCartItens();
+        refreshCartFromCookie();
     }
 }
 /* This async function will perform the buy action and generate an paid order */
 buyAsync = () => {
-    console.log(getProductIdAndQuantity())
     if(t_client_fk){
         if(t_shipping_fk){
-            $("#cart_state").html("<img src='img/loader.gif' />");
+            var tips = $("#cart_state");
+            tips.html("<img src='img/loader.gif' />");
             $.post("backend/api/shop.php?action=insertOrder",
             { 
                 t_client_fk: t_client_fk,
                 t_shipping_fk: t_shipping_fk,
-                productQuantityArray: getProductIdAndQuantity()
+                itens: getProductIdAndQuantity()
             },
             (data, status) => {
                 if(status == "success"){
@@ -820,6 +825,5 @@ getProductIdAndQuantity = () => {
             productIdAndQuantity.push({ 't_product_fk' : id, 'quantity' : cookieValueStored });
         }
     }
-    console.log(productIdAndQuantity.length)
     return productIdAndQuantity;
 }

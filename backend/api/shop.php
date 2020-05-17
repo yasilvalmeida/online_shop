@@ -225,15 +225,21 @@
     /*********************/
 
     /* Order Action Begin */
-    // Perform fetch all rating action
+    // Perform fetch all orders action
     else if($_GET["action"] == 'fetchAllOrder')
     {
         $data = $onlineShopOrderAPI->fetchAllOrder();
     }
-    // Perform remove rating action
+    // Perform remove order action
     else if($_GET["action"] == 'removeOrder')
     {
         $data = $onlineShopOrderAPI->removeOrder();
+        $data = $data[0];
+    }
+    // Perform insert order action
+    else if($_GET["action"] == 'insertOrder')
+    {
+        $data = $onlineShopOrderAPI->insertOrder();
         $data = $data[0];
     }
     /* Order Action End */

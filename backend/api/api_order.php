@@ -62,70 +62,68 @@
         {
             try
             {
-                /* Check if for the empty or null username, date and rate parameters */
-                if(isset($_POST["username"]) && isset($_POST["date"]) && isset($_POST["rate"]))
+                /* Check if for the empty or null t_client_fk, date and rate parameters */
+                if(isset($_POST["t_client_fk"]) && isset($_POST["t_shipping_fk"]) && isset($_POST["itens"]))
                 {
-                    // Get the username from POST request to check
-                    $check_data = array(
-                        ':username' => $_POST["username"]
-                    );
-                    // Get the username, date and rate from POST request to insert
+                    // Get the t_client_fk and t_shipping_fk from POST request to insert
                     $form_data = array(
-                        ':username'     => $_POST["username"], 
-                        ':date'    => $_POST["date"],
-                        ':rate'     => $_POST["rate"]
+                        ':date'          => date("Y-m-d h:i:sa"),
+                        ':t_client_fk'   => $_POST["t_client_fk"], 
+                        ':t_shipping_fk' => $_POST["t_shipping_fk"]
                     );
-                    // Check for existent order with the same username in Database
-                    $query = "
-                            select id 
-                            from t_order
-                            where username = :username
-                            ";
+                    // Bought products id and quantity array
+                    $itens = $_POST["itens"];
                     // Create object to connect to MySQL using PDO
                     $mysqlPDO = new MySQLPDO();
+                    // Create a SQL query to insert an order with a new username, date and rate
+                    $query = "
+                                insert t_order(date, t_client_fk, t_shipping_fk) values(:date, :t_client_fk, :t_shipping_fk);
+                            ";
                     // Prepare the query 
                     $statement = $mysqlPDO->getConnection()->prepare($query);
-                    // Execute the query with passed parameter username
-                    $statement->execute($check_data);
-                    // Get affect rows in associative array
-                    $row = $statement->fetch(PDO::FETCH_ASSOC);
+                    // Execute the query with passed parameter username, date and rate
+                    $statement->execute($form_data);
                     // Check if any affected row
-                    if($row)
+                    if ($statement->rowCount())
                     {
-                        $data[] = array('result' => 'This record already exists!');
-                    }
-                    else
-                    {
+                        // Get the last insert id
+                        $t_order_fk =  $mysqlPDO->getConnection()->lastInsertId();
                         // Create a SQL query to insert an order with a new username, date and rate
                         $query = "
-                                insert t_order(username, date, rate) values(:username, :date, :rate);
+                                    insert t_item(quantity, t_product_fk, t_order_fk) values(:quantity, :t_product_fk, :t_order_fk);
                                 ";
-                        // Prepare the query 
-                        $statement = $mysqlPDO->getConnection()->prepare($query);
-                        // Execute the query with passed parameter username, date and rate
-                        $statement->execute($form_data);
-                        // Check if any affected row
-                        if ($statement->rowCount())
+                        // Foreach item
+                        foreach($itens as $item)
                         {
-                            $data[] = array('result' => '1');
-                        } 
-                        else
-                        {
-                            $data[] = array('result' => 'No affected row!');
+                            // Get the item info
+                            $form_data = array(
+                                ':t_product_fk' => $item['t_product_fk'],
+                                ':quantity'     => $item['quantity'],
+                                ':t_order_fk'   => $t_order_fk
+                            );
+                            // Prepare the query 
+                            $statement = $mysqlPDO->getConnection()->prepare($query);
+                            // Execute the query with passed parameter username, date and rate
+                            $statement->execute($form_data);
                         }
+                        $data[] = array('result' => '1');
+                    } 
+                    else
+                    {
+                        $data[] = array('result' => 'No affected row!');
                     }
                 }
                 else
                 {
                     // Check for missing parameters
-                    if(!isset($_POST["username"]) && !isset($_POST["date"]) && !isset($_POST["rate"]))
+                    if(!isset($_POST["t_client_fk"]) && !isset($_POST["t_shipping_fk"]) && !isset($_POST["rate"]))
                         $data[] = array('result' => 'Missing all parameters for insert an new order!');
-                    else if(!isset($_POST["username"]))
-                        $data[] = array('result' => 'Missing username parameter');
-                    else if(!isset($_POST["date"]))
-                        $data[] = array('result' => 'Missing date parameter');
+                    else if(!isset($_POST["t_client_fk"]))
+                        $data[] = array('result' => 'Missing t_client_fk parameter');
+                    else if(!isset($_POST["t_shipping_fk"]))
+                        $data[] = array('result' => 'Missing t_shipping_fk parameter');
                     else
-                        $data[] = array('result' => 'Missing rate parameter');
+                        $data[] = array('result' => 'Missing itens parameter');
                 }
                 return $data;
             } 
