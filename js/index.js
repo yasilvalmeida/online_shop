@@ -29,8 +29,7 @@ $(() => {
     }
     $('#cart_modal').on('shown.bs.modal', () => {
         $("#cartContent").html("<img src='img/loader.gif' />");
-        loadItensToCart();
-        loadShippingMethodAsynt();
+        loadItensToCart(); 
     });
     // Load all products from the Shop API
     fetchAllProductAsync();
@@ -643,6 +642,7 @@ refreshCartFromCookie = () => {
 /* This function will load itens to the cart from cookie */
 loadItensToCart = () => {
     $("#cart_modal").modal('show');
+    loadShippingMethodAsynt();
     updateCartItens();
 }
 /* This function will format the price adding the decimal part if need 1000,00 $*/
@@ -757,6 +757,7 @@ removeProductFromCart = (id) => {
         delCookie(cookieName);
         updateCartItens();
         refreshCartFromCookie();
+        loadShippingMethodAsynt();
     }
 }
 /* This async function will perform the buy action and generate an paid order */

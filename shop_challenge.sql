@@ -10,7 +10,8 @@ create table t_client(
     id int not null auto_increment,
     username varchar(20) not null,
     password varchar(20) not null,
-    balance float set default 100,
+    initial_balance float default 100,
+    balance float default 100,
     primary key(id)
 );
 

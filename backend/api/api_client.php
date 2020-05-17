@@ -42,7 +42,7 @@
                     {
                         // Create a SQL query to check if match this client with username and password
                         $query = "
-                        select id, balance
+                        select id, balance, initial_balance
                         from t_client 
                         where username = :username and password = :password
                         ";
@@ -73,6 +73,7 @@
                             $_SESSION[$_SESSION['views'].'username'] = $form_data[':username'];
                             $_SESSION[$_SESSION['views'].'password'] = $form_data[':password'];
                             $_SESSION[$_SESSION['views'].'balance'] = $row1['balance'];
+                            $_SESSION[$_SESSION['views'].'initial_balance'] = $row1['initial_balance'];
                             // data[] is a associative array that return json
                             $data[] = array('result' => '1');
                         }
@@ -112,8 +113,8 @@
                 {
                     // Get the username and password parameters from POST request
                     $form_data = array(
-                        ':username'  => $_POST["username"], 
-                        ':password'  => $_POST["password"]
+                        ':username' => $_POST["username"], 
+                        ':password' => $_POST["password"]
                     );
                     // Get the username from POST request for check for existent username
                     $check_data = array(
@@ -142,7 +143,8 @@
                     {
                         // Create a SQL query to check if exist this client with username and password
                         $query = "
-                                insert into t_client(username, password, balance) values(:username, :password, 100)
+                                insert into t_client(username, password) 
+                                values(:username, :password)
                                 ";
                         // Prepare the query 
                         $statement = $mysqlPDO->getConnection()->prepare($query);
@@ -214,60 +216,41 @@
                         ':username'  => $_POST["username"], 
                         ':password'  => $_POST["password"]
                     );
-                    // Check for existent data in Database
+                    // Create a SQL query to update the existent client with a new username and password for this passed id
                     $query = "
-                            select username, balance
-                            from t_client 
-                            where id = ?
+                            update t_client
+                            set username = :username, password = :password 
+                            where id = :id
                             ";
                     // Create object to connect to MySQL using PDO
                     $mysqlPDO = new MySQLPDO();
                     // Prepare the query 
                     $statement = $mysqlPDO->getConnection()->prepare($query);
-                    // Execute the query with passed parameter id
-                    $statement->execute([$form_data[':id']]);
-                    // Get affect rows in associative array
-                    $row = $statement->fetch(PDO::FETCH_ASSOC);
+                    // Execute the query with passed parameter id, username and password
+                    $statement->execute($form_data);
                     // Check if any affected row
-                    if($row)
+                    if ($statement->rowCount())
                     {
-                        // Create a SQL query to update the existent client with a new username and password for this passed id
-                        $query = "
-                                update t_client
-                                set username = :username, password = :password 
-                                where id = :id
-                                ";
-                        // Prepare the query 
-                        $statement = $mysqlPDO->getConnection()->prepare($query);
-                        // Execute the query with passed parameter id, username and password
-                        $statement->execute($form_data);
-                        // Check if any affected row
-                        if ($statement->rowCount())
+                        // Create session
+                        session_start();
+                        // Check for open session
+                        if(isset($_SESSION['views']))
                         {
-                            // Create session
-                            session_start();
-                            // Check for open session
-                            if(isset($_SESSION['views']))
-                            {
-                                // Update new logged client info into session 
-                                $_SESSION[$_SESSION['views'].'id'] = $form_data[':id'];
-                                $_SESSION[$_SESSION['views'].'username'] = $form_data[':username'];
-                                $_SESSION[$_SESSION['views'].'password'] = $form_data[':password'];
-                                $_SESSION[$_SESSION['views'].'balance'] = $row['balance'];
-                                // data[] is a associative array that return json
-                                $data[] = array('result' => '1');
-                            }
-                            else
-                            {
-                                $data[] = array('result' => 'No such session available!');
-                            }
-                        } else
-                        {
-                            $data[] = array('result' => 'No affected row!');
+                            // Update new logged client info into session 
+                            $_SESSION[$_SESSION['views'].'id'] = $form_data[':id'];
+                            $_SESSION[$_SESSION['views'].'username'] = $form_data[':username'];
+                            $_SESSION[$_SESSION['views'].'password'] = $form_data[':password'];
+                            // data[] is a associative array that return json
+                            $data[] = array('result' => '1');
                         }
+                        else
+                        {
+                            $data[] = array('result' => 'No such session available!');
+                        }
+                    } else
+                    {
+                        $data[] = array('result' => 'No affected row!');
                     }
-                    else
-                        $data[] = array('result' => 'Invalid client id!');
                 }
                 else
                 {
@@ -314,6 +297,7 @@
                         $client->getUsername(),
                         "********",
                         $client->getBalance(),
+                        $client->getInitialBalance(),
                         "<div class='span12' style='text-align:center'><a href='javascript:order(".$client->getId().")' class='btn btn-primary'><i class='fas fa-shopping-cart'></i></a></div>",
                         "<div class='span12' style='text-align:center'><a href='javascript:update(".json_encode($client).")' class='btn btn-info'><i class='fas fa-edit'></i></a></div>",
                         "<div class='span12' style='text-align:center'><a href='javascript:remove(".$client->getId().")' class='btn btn-danger'><i class='far fa-trash-alt'></i></a></div>"
