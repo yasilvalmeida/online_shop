@@ -140,8 +140,30 @@
                 <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <div id="cartContent" class="modal-body">
-                <!-- Content depend of the cases -->
+            <div class="modal-body">
+                <div id="cartContent">
+                    <!-- Content depend of the cases -->
+                </div>
+                <div>
+                    <form class="form-inline">
+                        <div class="form-group mx-sm-3 mb-2">
+                            <label>Shipping method</label>
+                            <select id="shippingMethodContent" class="form-control"></select>
+                        </div>
+                    </form>
+                </div>
+                <div>
+                    <table class="table table-hover table-stripped">
+                        <thead>
+                            <tr>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                                <th scope="col"></th>
+                                <th scope="col" id="cartFinalPrice"></th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>

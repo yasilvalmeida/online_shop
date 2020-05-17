@@ -1,7 +1,7 @@
 <?php
     // Import the needed classes
     require_once("mysql_pdo.php");
-    require_once("../object/shipping.php");
+    require_once("../classes/shipping.php");
     // Online Shop API for Shipping CRUD Class
     class OnlineShopShippingAPI
     {
@@ -33,6 +33,56 @@
                         $shipping->getPrice(),
                         "<div class='span12' style='text-align:center'><a href='javascript:update(".json_encode($shipping).")' class='btn btn-info'><i class='fas fa-edit'></i></a></div>",
                         "<div class='span12' style='text-align:center'><a href='javascript:remove(".$shipping->getId().")' class='btn btn-danger'><i class='far fa-trash-alt'></i></a></div>"
+                    );  
+                }
+                // Export into DataTable json format if there's any record in $tmp_data
+                if(isset($tmp_data) && count($tmp_data) > 0)
+                {
+                    $data = array
+                    (
+                        "data" => $tmp_data
+                    );
+                }
+                else
+                {
+                    $data = array
+                    (
+                        "data" => array()
+                    );
+                }
+                return $data;
+            }
+            catch (PDOException $e) 
+            {
+                die("Error message: " . $e->getMessage());
+            }
+        }
+        /* Retrieve all shipping on the database */
+        function fetchAllShippingToSelect()
+        {
+            try
+            {
+                // Select all shipping
+                $query = "select * from t_shipping";
+                // Create object to connect to MySQL using PDO
+                $mysqlPDO = new MySQLPDO();
+                // Prepare the query 
+                $statement = $mysqlPDO->getConnection()->prepare($query);
+                // Execute the query without paramters
+                $statement->execute();
+                // Get affect rows in associative array
+                $rows = $statement->fetchAll();
+                // Foreach row in array
+                foreach ($rows as $row) 
+                {
+                    // Create a Shipping object
+                    $shipping = new Shipping($row);
+                    //Create datatable row
+                    $tmp_data[] = array
+                    (
+                        $shipping->getId(),
+                        $shipping->getName(),
+                        $shipping->getPrice()
                     );  
                 }
                 // Export into DataTable json format if there's any record in $tmp_data

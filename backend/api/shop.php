@@ -79,6 +79,11 @@
     {
         $data = $onlineShopShippingAPI->fetchAllShipping();
     }
+    // Perform fetch all shipping to select action
+    else if ($_GET["action"] == 'fetchAllShippingToSelect')
+    {
+        $data = $onlineShopShippingAPI->fetchAllShippingToSelect();
+    }
     // Perform insert shipping action
     else if($_GET["action"] == 'insertShipping')
     {

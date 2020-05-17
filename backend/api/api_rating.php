@@ -1,7 +1,7 @@
 <?php
     // Import the needed classes
     require_once("mysql_pdo.php");
-    require_once("../object/rating.php");
+    require_once("../classes/rating.php");
     // Online Shop API for Rating CRUD Class
     class OnlineShopRatingAPI
     {

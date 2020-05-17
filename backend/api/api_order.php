@@ -1,7 +1,7 @@
 <?php
     // Import the needed classes
     require_once("mysql_pdo.php");
-    require_once("../object/order.php");
+    require_once("../classes/order.php");
     // Online Shop API for Order CRUD Class
     class OnlineShopOrderAPI
     {

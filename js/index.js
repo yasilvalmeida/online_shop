@@ -6,7 +6,8 @@ var logged_id = $("#logged_id").val(),
     paginationIndex = 1,
     paginationItemPerIndex = 3,
     paginationGroup,
-    product_id;
+    product_id,
+    cartTotalPrice = 0;
 $(() => {
     // If some username is log in
     if(logged_username != 'Guest'){
@@ -24,7 +25,9 @@ $(() => {
         });
     }
     $('#cart_modal').on('shown.bs.modal', () => {
+        $("#cartContent").html("<img src='img/loader.gif' />");
         loadItensToCart();
+        loadShippingMethodAsynt();
     });
     // Load all products from the Shop API
     fetchAllProductAsync();
@@ -300,6 +303,8 @@ logoutAsync = () => {
 }
 /* This async function will call the shop api and perfom the fetchAllProductFrontEnd action */
 fetchAllProductAsync = () =>{
+    $("#productContent").html("<img src='img/loader.gif' />");
+    $("#productPagination").html("<img src='img/loader.gif' />");
     $.post("backend/api/shop.php?action=fetchAllProductFrontEnd",
     { },
     (data, status) => {
@@ -309,12 +314,7 @@ fetchAllProductAsync = () =>{
                     products = r.data;
                 total_product = products.length;
                 $.each(products, (i, product) => {
-                    var id = product[0],
-                        name = product[1],
-                        price = product[2],
-                        unit = product[3],
-                        quantity = product[4];
-                    productArray[i] = new Product(id, name, price, unit, quantity);
+                    productArray[i] = new Product(product[0], product[1], product[2], product[3], product[4]);
                 });
                 paginationGroup = Math.ceil(total_product/paginationItemPerIndex);
                 // Create the pagination
@@ -386,66 +386,58 @@ loadProductPerGroupAsync = () => {
                 switch(products.length){
                     case 3:
                         $.each(products, (i, product) => {
-                            var id = product.id,
-                                name = product.name,
-                                price = product.price,
-                                unit = product.unit,
-                                quantity = product.quantity;
+                            var product = new Product(product.id, product.name, product.price, product.unit, product.quantity);
                             htmlCreated += '<div class="card mb-4 box-shadow">';
                             htmlCreated += '<div class="card-header">';
-                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + name + '</h4>';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.getName() + '</h4>';
                             htmlCreated += '</div>';
                             htmlCreated += '<div class="card-body">';
-                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + price + ' / ' + unit + '</h1>';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.getPrice() + ' / ' + product.getUnit() + '</h1>';
                             // Check if product quantity > 0 to show how many is available in stock and else out of stock
-                            if (parseInt(quantity) > 0) 
-                                htmlCreated += '  <p>' + quantity + ' available in stock</p>';
+                            if (parseInt(product.getQuantity()) > 0) 
+                                htmlCreated += '  <p>' + product.getQuantity() + ' available in stock</p>';
                             else
                                 htmlCreated += '  <p>Out of stock</p>';
                             // Check if there's any rated cookie for this product
-                            var cookieName = 'product_rated' + id,
+                            var cookieName = 'product_rated' + product.getId(),
                                 cookieValueStored = getCookie(cookieName);
                             if (cookieValueStored && cookieValueStored.includes(logged_username))
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
                             else
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
                             htmlCreated += '<hr/>';
                             // // Check if product quantity > 0 to show the button add to cart and else to hide
-                            if (parseInt(quantity) > 0)
-                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + id + '" type="number" min="1" max="' + quantity + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            if (parseInt(product.getQuantity()) > 0)
+                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + product.getId() + '" type="number" min="1" max="' + product.getQuantity() + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.getId() + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
                             htmlCreated += '</div>';
                             htmlCreated += '</div>';
                         });
                         break;
                     case 2:
                         $.each(products, (i, product) => {
-                            var id = product.id,
-                                name = product.name,
-                                price = product.price,
-                                unit = product.unit,
-                                quantity = product.quantity;
+                            var product = new Product(product.id, product.name, product.price, product.unit, product.quantity);
                             htmlCreated += '<div class="card mb-4 box-shadow">';
                             htmlCreated += '<div class="card-header">';
-                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + name + '</h4>';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.getName() + '</h4>';
                             htmlCreated += '</div>';
                             htmlCreated += '<div class="card-body">';
-                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + price + ' / ' + unit + '</h1>';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.getPrice() + ' / ' + product.getUnit() + '</h1>';
                             // Check if product quantity > 0 to show how many is available in stock and else out of stock
-                            if (parseInt(quantity) > 0) 
-                                htmlCreated += '  <p>' + quantity + ' available in stock</p>';
+                            if (parseInt(product.getQuantity()) > 0) 
+                                htmlCreated += '  <p>' + product.getQuantity() + ' available in stock</p>';
                             else
                                 htmlCreated += '  <p>Out of stock</p>';
                             // Check if there's any rated cookie for this product
-                            var cookieName = 'product_rated' + id,
+                            var cookieName = 'product_rated' + product.getId(),
                                 cookieValueStored = getCookie(cookieName);
                             if (cookieValueStored && cookieValueStored.includes(logged_username))
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
                             else
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
                             htmlCreated += '<hr/>';
                             // // Check if product quantity > 0 to show the button add to cart and else to hide
-                            if (parseInt(quantity) > 0)
-                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + id + '" type="number" min="1" max="' + quantity + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            if (parseInt(product.getQuantity()) > 0)
+                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + product.getId() + '" type="number" min="1" max="' + product.getQuantity() + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.getId() + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
                             htmlCreated += '</div>';
                             htmlCreated += '</div>';
                         });
@@ -453,33 +445,29 @@ loadProductPerGroupAsync = () => {
                         break;
                     case 1:
                         $.each(products, (i, product) => {
-                            var id = product.id,
-                                name = product.name,
-                                price = product.price,
-                                unit = product.unit,
-                                quantity = product.quantity;
+                            var product = new Product(product.id, product.name, product.price, product.unit, product.quantity);
                             htmlCreated += '<div class="card mb-4 box-shadow">';
                             htmlCreated += '<div class="card-header">';
-                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + name + '</h4>';
+                            htmlCreated += '  <h3 class="my-0 font-weight-normal">' + product.getName() + '</h4>';
                             htmlCreated += '</div>';
                             htmlCreated += '<div class="card-body">';
-                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + price + ' / ' + unit + '</h1>';
+                            htmlCreated += '  <h2 class="card-title pricing-card-title">$' + product.getPrice() + ' / ' + product.getUnit() + '</h1>';
                             // Check if product quantity > 0 to show how many is available in stock and else out of stock
-                            if (parseInt(quantity) > 0) 
-                                htmlCreated += '  <p>' + quantity + ' available in stock</p>';
+                            if (parseInt(product.getQuantity()) > 0) 
+                                htmlCreated += '  <p>' + product.getQuantity() + ' available in stock</p>';
                             else
                                 htmlCreated += '  <p>Out of stock</p>';
                             // Check if there's any rated cookie for this product
-                            var cookieName = 'product_rated' + id,
+                            var cookieName = 'product_rated' + product.getId(),
                                 cookieValueStored = getCookie(cookieName);
                             if (cookieValueStored && cookieValueStored.includes(logged_username))
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
                             else
-                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + id + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
+                                htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Rate</i></a>';
                             htmlCreated += '<hr/>';
                             // // Check if product quantity > 0 to show the button add to cart and else to hide
-                            if (parseInt(quantity) > 0)
-                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + id + '" type="number" min="1" max="' + quantity + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.id + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
+                            if (parseInt(product.getQuantity()) > 0)
+                                htmlCreated += '<div><label style="margin-right:5px;"><b>Qty</b></label><input id="quantityToAdd' + product.getId() + '" type="number" min="1" max="' + product.getQuantity() + '" value="1" /></div><a class="btn btn-warning" href="javascript:addToCart(' + product.getId() + ')" role="button"><i class="fas fa-cart-plus"> Add to cart</i></a>';
                             htmlCreated += '</div>';
                             htmlCreated += '</div>';
                         });
@@ -500,6 +488,7 @@ loadProductPerGroupAsync = () => {
 }
 /* This function will check if there's some browser cookie create for this product will show the rating saved else will add new rating */
 ratingProduct = (id) => {
+    $("#ratingContent").html("<img src='img/loader.gif' />");
     product_id = id;
     var cookieName = 'product_rated' + id,
     cookieValueStored = getCookie(cookieName);
@@ -589,11 +578,9 @@ loadRatingAsync = () => {
                     sumRating = 0,
                     htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Username</th><th scope="col">Date</th><th scope="col">Rating</th></tr></thead><tbody>';
                 $.each(ratings, (i, rating) => {
-                    var username = rating[0],
-                        date = rating[1],
-                        rate = rating[2];
-                    sumRating += parseInt(rate);
-                    htmlCreated += '<tr><td>' + username + '</td><td>' + date + '</td><td>' + convertRateToStars(rate) + '</td></tr>';
+                    var rating = new Rating(rating[2], rating[0], rating[1]);
+                    sumRating += parseInt(rating.getRate());
+                    htmlCreated += '<tr><td>' + rating.getUsername() + '</td><td>' + rating.getDate() + '</td><td>' + convertRateToStars(rating.getRate()) + '</td></tr>';
                 });
                 htmlCreated += '</tbody></table><hr/><h6>Average rating = ' + ((parseFloat(sumRating))/parseFloat(totalRating)) + '</h6>';
                 $("#ratingContent").html(htmlCreated);
@@ -654,48 +641,67 @@ refreshCartFromCookie = () => {
 }
 /* This function will load itens to the cart from cookie */
 loadItensToCart = () => {
-    var totalToPay = 0,
-        htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Product</th><th scope="col">Qty</th><th scope="col">$ / Unit</th><th scope="col">$ Total</th></tr></thead><tbody>';
+    var htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col"><div style="text-align:center"><i class="far fa-trash-alt"></i></div></th><th scope="col">Product</th><th scope="col"><div style="text-align:center">Qty</div></th><th scope="col"><div style="text-align:right">Unit $</div></th><th scope="col"><div style="text-align:right">Total $</div></th></tr></thead><tbody>';
     for(var i = 0; i < total_product; i++){
         var id = productArray[i]['id'],
-            name = productArray[i]['name'],
-            price = parseFloat(productArray[i]['price']),
             cookieName = 'product_added' + id,
             cookieValueStored = parseInt(getCookie(cookieName));
         if (cookieValueStored) {
-            var priceTimesQuantity = price * cookieValueStored;
-            totalToPay += priceTimesQuantity;
-            htmlCreated += '<tr><td><b>' + name + '</b></td><td>' + cookieValueStored + '</td><td>$' + price + '</td><td>$' + priceTimesQuantity + '</td></tr>';
+            var name = productArray[i]['name'],
+                price = parseFloat(productArray[i]['price']),
+                priceTimesQuantity = price * cookieValueStored;
+            cartTotalPrice += priceTimesQuantity;
+            htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center">' + cookieValueStored + '</div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
         }
     }
-    htmlCreated += '</tbody><tfoot><tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col">$' + totalToPay + '</th></tr></tfoot></table>';
+    htmlCreated += '</tbody><tfoot><tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div style="text-align:right">' + formatPrice(cartTotalPrice) + ' $</div></th></tr></tfoot></table>';
     $("#cartContent").html(htmlCreated);
+    $("#cartFinalPrice").html(cartTotalPrice);
     $("#cart_modal").modal('show');
 }
-/* This async function will perform the buy action and generate an paid order */
-buyAsync = () => {
-    $.post("backend/api/shop.php?action=fetchAllRating",
-    { 
-        t_product_fk: product_id
-    },
+/* This function will format the price adding the decimal part if need 1000,00 $*/
+formatPrice = (price) => {
+    var parts = (price + '').split('.'),
+        integerPart = parts[0],
+        decimalPart = parts[1],
+        integerPart = (integerPart >= 1000) ? processPrice(integerPart) : integerPart,
+        decimalPart = (!decimalPart) ? '00' : completePrice(decimalPart);
+    return integerPart + ',' + decimalPart;
+}
+/* This function will process recursively the space between thousands in integer part */
+processPrice = (price) => {
+    if (price < 1000)
+        return (price);
+    else {
+        var quotient = parseInt(price / 1000),
+            remainder = parseInt(price % 1000);
+        console.log(quotient)
+        console.log(remainder)
+        return quotient + " " + remainder;
+    }
+}
+/* This function will complete the decimal part with 0 if the lenght == 1 or return the decimalPart */
+completePrice = (decimalPart) => {
+    return (decimalPart.length == 1) ? decimalPart + "0" : decimalPart;
+}
+/* This async function will load shipping method from the database using Shop API */
+loadShippingMethodAsynt = () => {
+    $.post("backend/api/shop.php?action=fetchAllShippingToSelect",
+    { },
     (data, status) => {
         if(status == "success"){
             try {
                 var r = JSON.parse(data),
-                    ratings = r.data,
-                    totalRating = ratings.length,
-                    sumRating = 0,
-                    htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Username</th><th scope="col">Date</th><th scope="col">Rating</th></tr></thead><tbody>';
-                $.each(ratings, (i, rating) => {
-                    var username = rating[0],
-                        date = rating[1],
-                        rate = rating[2];
-                    sumRating += parseInt(rate);
-                    htmlCreated += '<tr><td>' + username + '</td><td>' + date + '</td><td>' + convertRateToStars(rate) + '</td></tr>';
+                    shippings = r.data,
+                    htmlCreated = '<option id="-1">Please select a shipping method</option>';
+                $.each(shippings, (i, shipping) => {
+                    var shipping = new Shipping(shipping[0], shipping[1], shipping[2]);
+                    htmlCreated += '<option id="shippingOption' + shipping.getId() + '">' + shipping.getName() + ' - ' + shipping.getPrice() + '</option>';
                 });
-                htmlCreated += '</tbody></table><hr/><h6>Average rating = ' + ((parseFloat(sumRating))/parseFloat(totalRating)) + '</h6>';
-                $("#ratingContent").html(htmlCreated);
-                $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>');
+                $("#shippingMethodContent").html(htmlCreated);
+                $("#shippingMethodContent").change(() => {
+                    alert( "Handler for .change() called." );
+                });
             } catch (error) {
                 console.log(error)
             }
@@ -705,4 +711,39 @@ buyAsync = () => {
             console.log(error)
         }
     });
+}
+/* This async function will perform the buy action and generate an paid order */
+buyAsync = () => {
+    console.log('Perform the buy action')
+    // $.post("backend/api/shop.php?action=fetchAllRating",
+    // { 
+    //     t_product_fk: product_id
+    // },
+    // (data, status) => {
+    //     if(status == "success"){
+    //         try {
+    //             var r = JSON.parse(data),
+    //                 ratings = r.data,
+    //                 totalRating = ratings.length,
+    //                 sumRating = 0,
+    //                 htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Username</th><th scope="col">Date</th><th scope="col">Rating</th></tr></thead><tbody>';
+    //             $.each(ratings, (i, rating) => {
+    //                 var username = rating[0],
+    //                     date = rating[1],
+    //                     rate = rating[2];
+    //                 sumRating += parseInt(rate);
+    //                 htmlCreated += '<tr><td>' + username + '</td><td>' + date + '</td><td>' + convertRateToStars(rate) + '</td></tr>';
+    //             });
+    //             htmlCreated += '</tbody></table><hr/><h6>Average rating = ' + ((parseFloat(sumRating))/parseFloat(totalRating)) + '</h6>';
+    //             $("#ratingContent").html(htmlCreated);
+    //             $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>');
+    //         } catch (error) {
+    //             console.log(error)
+    //         }
+            
+    //     }
+    //     else{
+    //         console.log(error)
+    //     }
+    // });
 }

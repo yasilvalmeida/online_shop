@@ -1,7 +1,7 @@
 <?php
     // Import the needed classes
     require_once("mysql_pdo.php");
-    require_once("../object/client.php");
+    require_once("../classes/client.php");
     // Online Shop API for Client CRUD Class
     class OnlineShopClientAPI
     {
