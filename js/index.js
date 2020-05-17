@@ -742,6 +742,15 @@ updateCartItens = () => {
     $("#cartFooter").html(htmlCreated);
     updateCartPrice();
 }
+/* This function will remove the product from cookie and update the cart */
+removeProductFromCart = (id) => {
+    var cookieName = 'product_added' + id,
+        cookieValueStored = getCookie(cookieName);
+    if(cookieValueStored) {
+        delCookie(cookieName);
+        updateCartItens();
+    }
+}
 /* This async function will perform the buy action and generate an paid order */
 buyAsync = () => {
     console.log('Perform the buy action')
