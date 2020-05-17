@@ -761,50 +761,59 @@ removeProductFromCart = (id) => {
 }
 /* This async function will perform the buy action and generate an paid order */
 buyAsync = () => {
-    if(t_client_fk){
-        if(t_shipping_fk){
-            var tips = $("#cart_state");
-            tips.html("<img src='img/loader.gif' />");
-            $.post("backend/api/shop.php?action=insertOrder",
-            { 
-                t_client_fk: t_client_fk,
-                t_shipping_fk: t_shipping_fk,
-                itens: getProductIdAndQuantity()
-            },
-            (data, status) => {
-                if(status == "success"){
-                    try {
-                        var r = JSON.parse(data);
-                        if(parseInt(r.result) != NaN && parseInt(r.result) == 1){
-                            tips.html("New order processed!");
-                            // Check if this product was rated by some other client to add previous rating
-                            cleanCart();
-                            toastr.success("New order processed!");
-                            $("#cart_modal").modal('hide');
+    var tips = $("#cart_state");
+    if(t_client_fk){ // Check if have some client session open 
+        if(t_shipping_fk){ // Check if the shipping method was selected
+            var cartFinishedPrice = parseFloat(cartTotalPrice) + parseFloat(cartShippingCost);
+            if(parseFloat(logged_balance) >= cartFinishedPrice) { // Check if the available client balance is enough for the cart final price
+                
+                tips.html("<img src='img/loader.gif' />");
+                $.post("backend/api/shop.php?action=insertOrder",
+                { 
+                    t_client_fk: t_client_fk,
+                    t_shipping_fk: t_shipping_fk,
+                    itens: getProductIdAndQuantity()
+                },
+                (data, status) => {
+                    if(status == "success"){
+                        try {
+                            var r = JSON.parse(data);
+                            if(parseInt(r.result) != NaN && parseInt(r.result) == 1){
+                                tips.html("New order processed!");
+                                // Check if this product was rated by some other client to add previous rating
+                                cleanCart();
+                                toastr.success("New order processed!");
+                                $("#cart_modal").modal('hide');
+                            }
+                            else{
+                                updateTips(tips, r.result);
+                            }
+                        } catch (error) {
+                            console.log(error)
                         }
-                        else{
-                            updateTips(tips, r.result);
-                        }
-                    } catch (error) {
+                        
+                    }
+                    else{
                         console.log(error)
                     }
-                    
-                }
-                else{
-                    console.log(error)
-                }
-            });
+                });
+            }
+            else{
+                tips.html("Enough balance for this purchase!");
+                toastr.warning("Enough balance for this purchase!");
+            }
         }
         else {
-            $("#cart_state").html("Please select the shipping method!");
+            tips.html("Please select the shipping method!");
+            toastr.warning("Please select the shipping method!");
         }
     }
     else {
         setTimeout(() => {
             $("#cart_modal").modal('hide');
         }, 2000);
-        $("#cart_state").html("You must log in first!");
-        toastr.error("You must log in first!");
+        tips.html("You must log in first!");
+        toastr.warning("You must log in first!");
     }
 }
 /* This function will clean the products in cookie and update cart  */
