@@ -7,7 +7,8 @@ var logged_id = $("#logged_id").val(),
     paginationItemPerIndex = 3,
     paginationGroup,
     product_id,
-    cartTotalPrice = 0;
+    cartTotalPrice = 0,
+    cartShippingCost = 0;
 $(() => {
     // If some username is log in
     if(logged_username != 'Guest'){
@@ -641,23 +642,8 @@ refreshCartFromCookie = () => {
 }
 /* This function will load itens to the cart from cookie */
 loadItensToCart = () => {
-    var htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col"><div style="text-align:center"><i class="far fa-trash-alt"></i></div></th><th scope="col">Product</th><th scope="col"><div style="text-align:center">Qty</div></th><th scope="col"><div style="text-align:right">Unit $</div></th><th scope="col"><div style="text-align:right">Total $</div></th></tr></thead><tbody>';
-    for(var i = 0; i < total_product; i++){
-        var id = productArray[i]['id'],
-            cookieName = 'product_added' + id,
-            cookieValueStored = parseInt(getCookie(cookieName));
-        if (cookieValueStored) {
-            var name = productArray[i]['name'],
-                price = parseFloat(productArray[i]['price']),
-                priceTimesQuantity = parseFloat(price * cookieValueStored);
-            cartTotalPrice += priceTimesQuantity;
-            htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center">' + cookieValueStored + '</div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
-        }
-    }
-    htmlCreated += '</tbody><tfoot><tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div style="text-align:right">' + formatPrice(cartTotalPrice) + ' $</div></th></tr></tfoot></table>';
-    $("#cartContent").html(htmlCreated);
-    $("#cartFinalPrice").html(formatPrice(cartTotalPrice))
     $("#cart_modal").modal('show');
+    updateCartItens();
 }
 /* This function will format the price adding the decimal part if need 1000,00 $*/
 formatPrice = (price) => {
@@ -679,9 +665,6 @@ processPrice = (price) => {
 }
 /* This function will complete the remainder digits until complete three digits */
 completePriceRemainder = (remainder) => {
-    if(remainder == 0){
-        console.log('r=' + remainder + ', rl=' + (remainder + '').length)
-    }
     switch((remainder + '').length){
         case 3:
             return remainder;
@@ -704,14 +687,15 @@ loadShippingMethodAsynt = () => {
             try {
                 var r = JSON.parse(data),
                     shippings = r.data,
-                    htmlCreated = '<option id="-1">Please select a shipping method</option>';
+                    htmlCreated = '<option id="-1">Please select</option>';
                 $.each(shippings, (i, shipping) => {
                     var shipping = new Shipping(shipping[0], shipping[1], shipping[2]);
-                    htmlCreated += '<option id="shippingOption' + shipping.getId() + '">' + shipping.getName() + ' - ' + shipping.getPrice() + '</option>';
+                    htmlCreated += '<option value="' + shipping.getPrice() + '" >' + shipping.getName() + '</option>';
                 });
                 $("#shippingMethodContent").html(htmlCreated);
                 $("#shippingMethodContent").change(() => {
-                    alert( "Handler for .change() called." );
+                    cartShippingCost = $("#shippingMethodContent option:selected").val();
+                    updateCartPrice();
                 });
             } catch (error) {
                 console.log(error)
@@ -722,6 +706,41 @@ loadShippingMethodAsynt = () => {
             console.log(error)
         }
     });
+}
+/* This function wil update the cart final price with shipping cost */
+updateCartPrice = () => {
+    if (cartShippingCost >= 0) {
+        cartShippingCost = parseFloat(cartShippingCost);
+        $("#cartShippingPrice").html('<div style="text-align:right">' + formatPrice(cartShippingCost) + ' $</div>');
+        $("#cartFinalPrice").html('<div style="text-align:right">' + formatPrice(cartTotalPrice + cartShippingCost) + ' $</div>');
+    }
+    else {
+        $("#cartShippingPrice").html('');
+        $("#cartFinalPrice").html('<div style="text-align:right">' + formatPrice(cartTotalPrice) + ' $</div>');
+    }
+    
+}
+/* This function will update the itens in cart when removed */
+updateCartItens = () => {
+    var htmlCreated = '';
+    for(var i = 0; i < total_product; i++){
+        var id = productArray[i]['id'],
+            cookieName = 'product_added' + id,
+            cookieValueStored = parseInt(getCookie(cookieName));
+        if (cookieValueStored) {
+            var name = productArray[i]['name'],
+                price = parseFloat(productArray[i]['price']),
+                priceTimesQuantity = parseFloat(price * cookieValueStored);
+            cartTotalPrice += priceTimesQuantity;
+            htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center">' + cookieValueStored + '</div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
+        }
+    }
+    htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div style="text-align:right">' + formatPrice(cartTotalPrice) + ' $</div></th></tr>';
+    $("#cartContent").html(htmlCreated);
+    htmlCreated  = '<tr><th colspan="2" scope="col"><label style="margin-top: 5px;">Shipping method</label></th><th colspan="2" scope="col"><select id="shippingMethodContent" class="form-control"></select></th><th scope="col"><div id="cartShippingPrice" style="text-align:right"></div></th></tr>';
+    htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div id="cartFinalPrice" style="text-align:right"></div></th></tr>';
+    $("#cartFooter").html(htmlCreated);
+    updateCartPrice();
 }
 /* This async function will perform the buy action and generate an paid order */
 buyAsync = () => {

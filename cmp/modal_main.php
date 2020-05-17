@@ -133,7 +133,7 @@
 <!-- Cart Modal-->
 <div class="modal fade" id="cart_modal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
-        <div class="modal-content">
+        <div class="modal-content" style="width:550px;">
             <div class="modal-header">
                 <h5 class="modal-title">Cart</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
@@ -141,27 +141,23 @@
                 </button>
             </div>
             <div class="modal-body">
-                <div id="cartContent">
-                    <!-- Content depend of the cases -->
-                </div>
-                <div>
-                    <form class="form-inline">
-                        <div class="form-group mx-sm-3 mb-2">
-                            <label>Shipping method</label>
-                            <select id="shippingMethodContent" class="form-control"></select>
-                        </div>
-                    </form>
-                </div>
                 <div>
                     <table class="table table-hover table-stripped">
                         <thead>
                             <tr>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
-                                <th scope="col"></th>
-                                <th scope="col" id="cartFinalPrice"></th>
+                                <th scope="col"><div style="text-align:center"><i class="far fa-trash-alt"></i></div></th>
+                                <th scope="col">Product</th>
+                                <th scope="col"><div style="text-align:center">Qty</div></th>
+                                <th scope="col"><div style="text-align:right">Unit $</div></th>
+                                <th scope="col"><div style="text-align:right">Total $</div></th>
                             </tr>
                         </thead>
+                        <tbody id="cartContent">
+                            <!-- Load cart footer -->
+                        </tbody>
+                        <tfoot id="cartFooter">
+                            <!-- Load cart footer -->
+                        </tfoot>
                     </table>
                 </div>
             </div>
