@@ -1,6 +1,7 @@
 var t_client_fk = $("#logged_id").val(),
     logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest',
     logged_balance = parseFloat($("#logged_balance").val()),
+    logged_initial_balance = parseFloat($("#logged_initial_balance").val()),
     total_product = 0,
     productArray = new Array(),
     paginationIndex = 1,
@@ -69,6 +70,7 @@ loadMyInfo = () => {
     $("#username_changed").val($("#logged_username").val());
     $("#password_changed").val($("#logged_password").val());
     $("#balance_changed").val(formatPrice(parseFloat($("#logged_balance").val())) + ' $');
+    $("#initial_balance_changed").val(formatPrice(parseFloat($("#logged_initial_balance").val())) + ' $');
 }
 /* This function will validate the log in username and password and call the login async function */
 login = () => {

@@ -9,10 +9,12 @@
     $username = $_SESSION[$_SESSION['views'].'username'];
     $password = $_SESSION[$_SESSION['views'].'password'];
     $balance = $_SESSION[$_SESSION['views'].'balance'];
+    $initia_balance = $_SESSION[$_SESSION['views'].'initial_balance'];
     echo "<input type='hidden' id='logged_id' value='".$id."' />";
     echo "<input type='hidden' id='logged_username' value='".$username."' />";
     echo "<input type='hidden' id='logged_password' value='".$password."' />";
     echo "<input type='hidden' id='logged_balance' value='".$balance."' />";
+    echo "<input type='hidden' id='logged_initial_balance' value='".$initia_balance."' />";
   }
 ?>
 <!doctype html>

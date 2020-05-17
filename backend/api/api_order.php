@@ -6,7 +6,7 @@
     class OnlineShopOrderAPI
     {
         /* Order Actions Begin */
-        /* Retrieve all order on the database to BackEnd */
+        /* Retrieve all order on the database to back end */
         function fetchAllOrderBackEnd()
         {
             try
@@ -86,8 +86,8 @@
                 die("Error message: " . $e->getMessage());
             }
         }
-        /* Retrieve all order on the database to BackEnd */
-        function fetchAllOrder()
+        /* Retrieve all order on the database to front end */
+        function fetchAllOrderFrontEnd()
         {
             try
             {

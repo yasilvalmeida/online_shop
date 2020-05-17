@@ -97,6 +97,10 @@
                         <input id="password_changed" type="password" class="form-control form-control-user" />
                     </div>
                     <div class="form-group">
+                        <label>Initial balance</label>
+                        <input id="initial_balance_changed" type="text" disabled class="form-control form-control-user" />
+                    </div>
+                    <div class="form-group">
                         <label>Remaining balance</label>
                         <input id="balance_changed" type="text" disabled class="form-control form-control-user" />
                     </div>
@@ -136,6 +140,46 @@
         <div class="modal-content" style="width:550px;">
             <div class="modal-header">
                 <h5 class="modal-title">Cart</h5>
+                <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div>
+                    <table class="table table-hover table-stripped">
+                        <thead>
+                            <tr>
+                                <th scope="col"><div style="text-align:center"><i class="far fa-trash-alt"></i></div></th>
+                                <th scope="col">Product</th>
+                                <th scope="col"><div style="text-align:center">Qty</div></th>
+                                <th scope="col"><div style="text-align:right">Unit $</div></th>
+                                <th scope="col"><div style="text-align:right">Total $</div></th>
+                            </tr>
+                        </thead>
+                        <tbody id="cartContent">
+                            <!-- Load cart footer -->
+                        </tbody>
+                        <tfoot id="cartFooter">
+                            <!-- Load cart footer -->
+                        </tfoot>
+                    </table>
+                </div>
+                <hr />
+                <div id="cart_state" class="d-flex justify-content-center" role="alert"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button>
+                <a class="btn btn-success" href="javascript:buyAsync()">Buy</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Order Modal-->
+<div class="modal fade" id="order_modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" style="width:550px;">
+            <div class="modal-header">
+                <h5 class="modal-title">My Orders</h5>
                 <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">×</span>
                 </button>
