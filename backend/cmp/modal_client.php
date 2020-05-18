@@ -56,8 +56,8 @@
                         <input id="password_to_update" type="password" class="form-control form-control-user" />
                     </div>
                     <div class="form-group">
-                        <label>Acesso </label>
-                        <input id="balance_to_update" type="number" min="0" max="1" class="form-control form-control-user" />
+                        <label>Balance </label>
+                        <input id="balance_to_update" type="text" class="form-control form-control-user" />
                     </div>
                     <hr />
                     <div id="update_state" class="" role="alert">
