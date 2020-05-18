@@ -70,14 +70,36 @@ function checkRegexp(tips, o, regexp, n, tips) {
 }
 /* This function will load the logged user info into the change my info modal */
 loadMyInfo = () => {
-    logged_username = $("#logged_username").val();
-    logged_initial_balance = parseFloat($("#logged_initial_balance").val());
-    logged_balance = parseFloat($("#logged_balance").val());
-    $("#username_changed").val(logged_username);
-    $("#password_changed").val($("#logged_password").val());
-    $("#balance").val(formatPrice(logged_balance) + ' $');
-    $("#initial_balance").val(formatPrice(logged_initial_balance) + ' $');
-    $("#total_purchase").val(formatPrice(logged_initial_balance - logged_balance) + ' $')
+    $.post("backend/api/shop.php?action=fetchAllOrderFrontEnd",
+    { 
+        t_client_fk: t_client_fk
+    },
+    (data, status) => {
+        if(status == "success"){
+            try {
+                var r = JSON.parse(data),
+                    orders = r.data,
+                    totalPurchasePrice = 0;
+                $.each(orders, (i, order) => {
+                    var order = new Order(order[0], order[1], order[2], order[3], order[4]);
+                    totalPurchasePrice += parseFloat(order.getTotalPrice());
+                });
+                logged_username = $("#logged_username").val();
+                logged_initial_balance = parseFloat($("#logged_initial_balance").val());
+                $("#username_changed").val(logged_username);
+                $("#password_changed").val($("#logged_password").val());
+                $("#balance").val(formatPrice(logged_initial_balance - totalPurchasePrice) + ' $');
+                $("#initial_balance").val(formatPrice(logged_initial_balance) + ' $');
+                $("#total_purchase").val(formatPrice(totalPurchasePrice) + ' $')
+            } catch (error) {
+                console.log(error)
+            }
+            
+        }
+        else{
+            console.log(error)
+        }
+    });
 }
 /* This function will validate the log in username and password and call the login async function */
 login = () => {
@@ -875,7 +897,6 @@ loadMyOrder = () => {
                         totalPurchasePrice += parseFloat(order.getTotalPrice());
                         htmlCreated += '<tr><td scope="col"><div style="text-align:center">' + order.getId() + '</div></td><td scope="col"><div style="text-align:center">' + order.getDate() + '</div></td><td scope="col"><div style="text-align:center">' + order.getShipping() + '</div></td><td scope="col"><div style="text-align:center">' + order.getStatus() + '</div></td><td scope="col"><div style="text-align:right">' + formatPrice(order.getTotalPrice()) + ' $</div></td></tr>';
                     });
-                console.log(totalPurchasePrice)
                 $("#orderContent").html(htmlCreated);
                 htmlCreated = '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col">Total Purchase</th><th scope="col"><div style="text-align:right">' + formatPrice(totalPurchasePrice) + ' $</div></th></tr>';
                 $("#orderFooter").html(htmlCreated);
