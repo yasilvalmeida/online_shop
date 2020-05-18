@@ -11,7 +11,6 @@ create table t_client(
     username varchar(20) not null,
     password varchar(20) not null,
     initial_balance float default 100,
-    balance float default 100,
     primary key(id)
 );
 

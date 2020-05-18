@@ -1,6 +1,5 @@
 var t_client_fk = $("#logged_id").val(),
     logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest',
-    logged_balance = parseFloat($("#logged_balance").val()),
     logged_initial_balance = parseFloat($("#logged_initial_balance").val()),
     total_product = 0,
     productArray = new Array(),
@@ -10,8 +9,7 @@ var t_client_fk = $("#logged_id").val(),
     t_product_fk,
     t_shipping_fk,
     cartTotalPrice = 0,
-    cartShippingCost = -1,
-    shi
+    cartShippingCost = -1;
 $(() => {
     // If some username is log in
     if(logged_username != 'Guest'){
@@ -35,7 +33,8 @@ $(() => {
     $('#order_modal').on('shown.bs.modal', () => {
         loadMyOrder(); 
     });
-    console.log(document.cookie)
+    loadMyInfo();
+    // console.log(document.cookie)
     // Load all products from the Shop API
     fetchAllProductAsync();
 });
@@ -88,8 +87,8 @@ loadMyInfo = () => {
                 logged_initial_balance = parseFloat($("#logged_initial_balance").val());
                 $("#username_changed").val(logged_username);
                 $("#password_changed").val($("#logged_password").val());
-                $("#balance").val(formatPrice(logged_initial_balance - totalPurchasePrice) + ' $');
                 $("#initial_balance").val(formatPrice(logged_initial_balance) + ' $');
+                $("#balance").val(formatPrice(logged_initial_balance - totalPurchasePrice) + ' $');
                 $("#total_purchase").val(formatPrice(totalPurchasePrice) + ' $')
             } catch (error) {
                 console.log(error)
@@ -801,22 +800,21 @@ removeProductFromCart = (id) => {
 }
 /* This async function will perform the buy action and generate an paid order */
 buyAsync = () => {
-    var tips = $("#cart_state");
+    var tips = $("#cart_state"),
+        logged_balance = parseFloat($("#balance").val());
     if(t_client_fk){ // Check if have some client session open 
         if(t_shipping_fk){ // Check if the shipping method was selected
             var cartFinishedPrice = parseFloat(cartTotalPrice) + parseFloat(cartShippingCost);
-            if(parseFloat(logged_balance) >= cartFinishedPrice) { // Check if the available client balance is enough for the cart final price
+            if(logged_balance >= cartFinishedPrice) { // Check if the available client balance is enough for the cart final price
                 
                 tips.html("<img src='img/loader.gif' />");
                 $.post("backend/api/shop.php?action=insertOrder",
                 { 
                     t_client_fk: t_client_fk,
                     t_shipping_fk: t_shipping_fk,
-                    itens: getProductIdAndQuantity(),
-                    totalPrice: cartFinishedPrice
+                    itens: getProductIdAndQuantity()
                 },
                 (data, status) => {
-                    console.log(data)
                     if(status == "success"){
                         try {
                             var r = JSON.parse(data);

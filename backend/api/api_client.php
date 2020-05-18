@@ -42,10 +42,10 @@
                     {
                         // Create a SQL query to check if match this client with username and password
                         $query = "
-                        select id, balance, initial_balance
-                        from t_client 
-                        where username = :username and password = :password
-                        ";
+                                select id, initial_balance
+                                from t_client 
+                                where username = :username and password = :password
+                                ";
                         // Prepare the query 
                         $statement = $mysqlPDO->getConnection()->prepare($query);
                         // Execute the query with passed parameters username and password
@@ -72,7 +72,6 @@
                             $_SESSION[$_SESSION['views'].'id'] = $row1['id'];
                             $_SESSION[$_SESSION['views'].'username'] = $form_data[':username'];
                             $_SESSION[$_SESSION['views'].'password'] = $form_data[':password'];
-                            $_SESSION[$_SESSION['views'].'balance'] = $row1['balance'];
                             $_SESSION[$_SESSION['views'].'initial_balance'] = $row1['initial_balance'];
                             // data[] is a associative array that return json
                             $data[] = array('result' => '1');
@@ -277,7 +276,17 @@
             try
             {
                 // Select all clients
-                $query = "select * from t_client";
+                $query = "
+                        select c.id, c.username, c.password, c.initial_balance, ifnull(round(sum(i.quantity*p.price), 2), 0) as balance
+                        from t_client c
+                        left join t_order o
+                        on c.id = o.t_client_fk
+                        left join t_item i
+                        on o.id = i.t_order_fk
+                        left join t_product p
+                        on i.t_product_fk = p.id
+                        group by c.id, c.username, c.password, c.initial_balance
+                        ";
                 // Create object to connect to MySQL using PDO
                 $mysqlPDO = new MySQLPDO();
                 // Prepare the query 
@@ -296,8 +305,8 @@
                     (
                         $client->getUsername(),
                         "********",
-                        $client->getBalance(),
                         $client->getInitialBalance(),
+                        $client->getBalance(),
                         "<div class='span12' style='text-align:center'><a href='javascript:order(".$client->getId().")' class='btn btn-primary'><i class='fas fa-shopping-cart'></i></a></div>",
                         "<div class='span12' style='text-align:center'><a href='javascript:update(".json_encode($client).")' class='btn btn-info'><i class='fas fa-edit'></i></a></div>",
                         "<div class='span12' style='text-align:center'><a href='javascript:remove(".$client->getId().")' class='btn btn-danger'><i class='far fa-trash-alt'></i></a></div>"

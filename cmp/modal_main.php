@@ -88,26 +88,32 @@
             </div>
             <div class="modal-body">
                 <form class="client">
-                    <div class="form-group">
-                        <label>Username</label>
-                        <input id="username_changed" type="text" class="form-control form-control-user" />
-                    </div>
-                    <div class="form-group">
-                        <label>Password</label>
-                        <input id="password_changed" type="password" class="form-control form-control-user" />
-                    </div>
-                    <div class="form-group">
-                        <label>Initial balance</label>
-                        <input id="initial_balance" type="text" disabled class="form-control form-control-user" />
-                    </div>
-                    <div class="form-group">
-                        <label>Total purchase</label>
-                        <input id="total_purchase" type="text" disabled class="form-control form-control-user" />
-                    </div>
-                    <div class="form-group">
-                        <label>Remaining balance</label>
-                        <input id="balance" type="text" disabled class="form-control form-control-user" />
-                    </div>
+                    <table>
+                        <tr>
+                            <td>
+                                <label>Username</label>
+                                <input id="username_changed" type="text" class="form-control form-control-user" />
+                            </td>
+                            <td>
+                                <label>Password</label>
+                                <input id="password_changed" type="password" class="form-control form-control-user" />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label>Initial balance</label>
+                                <input id="initial_balance" type="text" disabled class="form-control form-control-user" />
+                            </td>
+                            <td>
+                                <label>Total purchase</label>
+                                <input id="total_purchase" type="text" disabled class="form-control form-control-user" />
+                            </td>
+                            <td>
+                                <label>Remaining balance</label>
+                                <input id="balance" type="text" disabled class="form-control form-control-user" />
+                            </td>
+                        </tr>
+                    </table>
                     <hr />
                     <div id="change_my_info_state" class="d-flex justify-content-center" role="alert"></div>
                 </form>

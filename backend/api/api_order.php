@@ -173,8 +173,8 @@
         {
             try
             {
-                /* Check if for the empty or null t_client_fk, t_shipping_fk, itens and totalPrice parameters */
-                if(isset($_POST["t_client_fk"]) && isset($_POST["t_shipping_fk"]) && isset($_POST["itens"]) && isset($_POST["totalPrice"]))
+                /* Check if for the empty or null t_client_fk, t_shipping_fk and itens parameters */
+                if(isset($_POST["t_client_fk"]) && isset($_POST["t_shipping_fk"]) && isset($_POST["itens"]))
                 {
                     // Get the t_client_fk and t_shipping_fk from POST request to insert
                     $serverDate = date("Y-m-d h:i:sa");
@@ -240,41 +240,7 @@
                                 // Execute the query with passed parameter username, date and rate
                                 $statement->execute($form_data);
                             }
-                            // Get the t_client_fk and clientBalance to update the actual balance
-                            $form_data = array(
-                                ':t_client_fk'    => $_POST["t_client_fk"], 
-                                ':totalPrice'     => $_POST["totalPrice"]
-                            );
-                            // Create a SQL query to insert an order with a new username, date and rate
-                            $query = "
-                                        update t_client
-                                        set balance = balance - :totalPrice
-                                        where id = :t_client_fk
-                                    ";
-                            // Prepare the query 
-                            $statement = $mysqlPDO->getConnection()->prepare($query);
-                            // Execute the query with passed parameter username, date and rate
-                            $statement->execute($form_data);
-                            // Check if any affected row
-                            if ($statement->rowCount()) {
-                                // Create session
-                                session_start();
-                                // Check for open session
-                                if(isset($_SESSION['views']))
-                                {
-                                    // Update new logged client info into session 
-                                    $clientBalanceStoredIntoSession = $_SESSION[$_SESSION['views'].'balance'];
-                                    $_SESSION[$_SESSION['views'].'balance'] = $clientBalanceStoredIntoSession - $_POST["totalPrice"];
-                                    // data[] is a associative array that return json
-                                    $data[] = array('result' => '1');
-                                }
-                                else
-                                {
-                                    $data[] = array('result' => 'No such session available!');
-                                }
-                            }
-                            else
-                                $data[] = array('result' => 'Error update client balance');
+                            $data[] = array('result' => '1');
                         }
                         else
                             $data[] = array('result' => 'No record found');
@@ -286,17 +252,15 @@
                 }
                 else
                 {
-                    // Check for missing parameters t_client_fk, t_shipping_fk, itens and totalPrice
-                    if(!isset($_POST["t_client_fk"]) && !isset($_POST["t_shipping_fk"]) && !isset($_POST["itens"]) && !isset($_POST["totalPrice"]))
+                    // Check for missing parameters t_client_fk, t_shipping_fk and itens
+                    if(!isset($_POST["t_client_fk"]) && !isset($_POST["t_shipping_fk"]) && !isset($_POST["itens"]))
                         $data[] = array('result' => 'Missing all parameters for insert an new order!');
                     else if(!isset($_POST["t_client_fk"]))
                         $data[] = array('result' => 'Missing t_client_fk parameter');
                     else if(!isset($_POST["t_shipping_fk"]))
                         $data[] = array('result' => 'Missing t_shipping_fk parameter');
-                    else if(!isset($_POST["itens"]))
-                        $data[] = array('result' => 'Missing itens parameter');
                     else
-                        $data[] = array('result' => 'Missing totalPrice parameter');
+                        $data[] = array('result' => 'Missing itens parameter');
                 }
                 return $data;
             } 

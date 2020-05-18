@@ -15,8 +15,8 @@
             $this->id              = $data['id'];
             $this->username        = $data['username'];
             $this->password        = $data['password'];
-            $this->balance         = $data['balance'];
             $this->initialBalance  = $data['initial_balance'];
+            $this->balance         = $data['balance'];            
         }
         // Get Id
         function getId()
