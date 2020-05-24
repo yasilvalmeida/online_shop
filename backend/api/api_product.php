@@ -66,7 +66,13 @@
             try
             {
                 // Select all product
-                $query = "select * from t_product";
+                $query = "
+                        select p.id, p.name, p.price, p.quantity - ifnull(sum(i.quantity), 0) as quantity, p.unit
+                        from t_product p
+                        left join t_item i
+                        on p.id = i.t_product_fk
+                        group by p.id, p.name, p.price, p.quantity, p.unit
+                        ";
                 // Create object to connect to MySQL using PDO
                 $mysqlPDO = new MySQLPDO();
                 // Prepare the query 
@@ -178,8 +184,11 @@
                     );
                     // Select all product
                     $query = "
-                            select *
-                            from t_product
+                            select p.id, p.name, p.price, p.quantity - ifnull(sum(i.quantity), 0) as quantity, p.unit
+                            from t_product p
+                            left join t_item i
+                            on p.id = i.t_product_fk
+                            group by p.id, p.name, p.price, p.quantity, p.unit
                             limit :offset, :limit"
                             ;
                     // Create object to connect to MySQL using PDO

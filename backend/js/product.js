@@ -101,10 +101,17 @@ function insert() {
     bValid = bValid && checkLength(tips, quantity_to_insert, "quantity", 1, 3, tips);
     bValid = bValid && checkLength(tips, unit_to_insert, "unit", 1, 5, tips);
     if (bValid) {
-        insertAsync();
+        if(parseInt(quantity_to_insert.val()) > 0)
+            insertAsync();
+        else{
+            quantity_to_insert.addClass("alert-danger");
+            updateTips(tips, "The quantity must be greater than 0 (zero).");
+        }
     }
 }
 function insertAsync() {
+    alert("Enter")
+    return;
     var tips = $("#insert_state");
     tips.addClass("alert-light");
     tips.html("<img src='../img/loader.gif' />");

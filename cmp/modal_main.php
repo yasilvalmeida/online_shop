@@ -156,10 +156,13 @@
             </div>
             <div class="modal-body">
                 <div>
+                    <spam id='cart-balance'></spam>
+                    <hr>
                     <table class="table table-hover table-stripped">
                         <thead>
                             <tr>
                                 <th scope="col"><div style="text-align:center"><i class="far fa-trash-alt"></i></div></th>
+                                <th scope="col"><div style="text-align:center"><i class='fas fa-edit'></i></div></th>
                                 <th scope="col">Product</th>
                                 <th scope="col"><div style="text-align:center">Qty</div></th>
                                 <th scope="col"><div style="text-align:right">Unit $</div></th>

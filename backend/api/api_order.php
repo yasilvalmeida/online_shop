@@ -101,7 +101,7 @@
                     );
                     // Select all orders
                     $query = "
-                            select o.id, o.date, s.name as shipping, round(sum(p.price*i.quantity), 2) as total
+                            select o.id, o.date, s.name as shipping, round(s.price, 2) + round(sum(p.price*i.quantity), 2) as total
                             from t_order o
                             inner join t_shipping s
                             on o.t_shipping_fk = s.id

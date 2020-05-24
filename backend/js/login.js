@@ -43,26 +43,8 @@ $(() => {
                 updateTips(tips, "The password must be filled.");
                 password_login.focus();
             }
-            else if (username_login.val() == password_login.val()) {
-                updateTips(tips, "The username and password must be different.");
-                password_login.focus();
-            }
-            else if (password_login.val().includes(username_login.val())) {
-                updateTips(tips, "The password must not contain the username.");
-                password_login.focus();
-            }
             else {
-                var bValid = true;
-                bValid = bValid && checkLength(tips, username_login, "username", 5, 20, tips);
-                bValid = bValid && checkRegexp(tips, username_login, /[QWERTYUIOPASDFGHJKLZXCVBNM]([0-9qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM])+$/i, "The username must begin with a letter and followed by numbers or letters.", tips);
-                bValid = bValid && checkLength(tips, password_login, "password", 6, 20, tips);
-                bValid = bValid && checkRegexp(tips, password_login, /[0-9]/, "The password must containt at least one number.", tips);
-                bValid = bValid && checkRegexp(tips, password_login, /[qwertyuiopasdfghjklzxcvbnm]/, "The password must contain at least one lowercase letter.", tips);
-                bValid = bValid && checkRegexp(tips, password_login, /[QWERTYUIOPASDFGHJKLZXCVBNM]/, "The password must contain at least one capital letter.", tips);
-                bValid = bValid && checkRegexp(tips, password_login, /[@£€#$%&*+-?!]/, "The password must consist of at least 1 special character, namely @, £, €, #, $, %, &, *, +, -, ? or !.", tips);
-                if (bValid) {
-                    loginAsync();
-                }
+                loginAsync();
             }
         }
     });
@@ -79,26 +61,8 @@ $(() => {
                 updateTips(tips, "The password must be filled.");
                 password_login.focus();
             }
-            else if (username_login.val() == password_login.val()) {
-                updateTips(tips, "The username and password must be different.");
-                password_login.focus();
-            }
-            else if (password_login.val().includes(username_login.val())) {
-                updateTips(tips, "The password must not contain the username.");
-                password_login.focus();
-            }
             else {
-                var bValid = true;
-                bValid = bValid && checkLength(tips, username_login, "username", 5, 20, tips);
-                bValid = bValid && checkRegexp(tips, username_login, /[QWERTYUIOPASDFGHJKLZXCVBNM]([0-9qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM])+$/i, "The username must begin with a letter and followed by numbers or letters.", tips);
-                bValid = bValid && checkLength(tips, password_login, "password", 6, 20, tips);
-                bValid = bValid && checkRegexp(tips, password_login, /[0-9]/, "The password must containt at least one number.", tips);
-                bValid = bValid && checkRegexp(tips, password_login, /[qwertyuiopasdfghjklzxcvbnm]/, "The password must contain at least one lowercase letter.", tips);
-                bValid = bValid && checkRegexp(tips, password_login, /[QWERTYUIOPASDFGHJKLZXCVBNM]/, "The password must contain at least one capital letter.", tips);
-                bValid = bValid && checkRegexp(tips, password_login, /[@£€#$%&*+-?!]/, "The password must consist of at least 1 special character, namely @, £, €, #, $, %, &, *, +, -, ? or !.", tips);
-                if (bValid) {
-                    loginAsync();
-                }
+                loginAsync();
             }
         }
     });
@@ -146,26 +110,8 @@ function login(){
         updateTips(tips, "The password must be filled.");
         password_login.focus();
     }
-    else if (username_login.val() == password_login.val()) {
-        updateTips(tips, "The username and password must be different.");
-        password_login.focus();
-    }
-    else if (password_login.val().includes(username_login.val())) {
-        updateTips(tips, "The password must not contain the username.");
-        password_login.focus();
-    }
     else {
-        var bValid = true;
-        bValid = bValid && checkLength(tips, username_login, "username", 5, 20, tips);
-        bValid = bValid && checkRegexp(tips, username_login, /[QWERTYUIOPASDFGHJKLZXCVBNM]([0-9qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM])+$/i, "The username must begin with a letter and followed by numbers or letters.", tips);
-        bValid = bValid && checkLength(tips, password_login, "password", 6, 20, tips);
-        bValid = bValid && checkRegexp(tips, password_login, /[0-9]/, "The password must containt at least one number.", tips);
-        bValid = bValid && checkRegexp(tips, password_login, /[qwertyuiopasdfghjklzxcvbnm]/, "The password must contain at least one lowercase letter.", tips);
-        bValid = bValid && checkRegexp(tips, password_login, /[QWERTYUIOPASDFGHJKLZXCVBNM]/, "The password must contain at least one capital letter.", tips);
-        bValid = bValid && checkRegexp(tips, password_login, /[@£€#$%&*+-?!]/, "The password must consist of at least 1 special character, namely @, £, €, #, $, %, &, *, +, -, ? or !.", tips);
-        if (bValid) {
-            loginAsync();
-        }
+        loginAsync();
     }
 }
 /* This is a async function that call the API to do the login */

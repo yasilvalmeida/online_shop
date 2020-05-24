@@ -1,6 +1,5 @@
 var t_client_fk = $("#logged_id").val(),
-    logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest',
-    logged_initial_balance = parseFloat($("#logged_initial_balance").val()),
+    logged_initial_balance = parseFloat($("#logged_initial_balance").val()) ? parseFloat($("#logged_initial_balance").val()) : 0,
     total_product = 0,
     productArray = new Array(),
     paginationIndex = 1,
@@ -9,14 +8,14 @@ var t_client_fk = $("#logged_id").val(),
     t_product_fk,
     t_shipping_fk,
     cartTotalPrice = 0,
-    cartShippingCost = -1;
+    cartShippingCost = -1,
+    totalPurchasePrice;
 $(() => {
     // If some username is log in
+    var logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest';
     if(logged_username != 'Guest'){
         $("#username_logged_view").html('<i class="fas fa-user"></i> ' + logged_username);
-        $('#change_modal').on('shown.bs.modal', () => {
-            loadMyInfo();
-        });
+        loadMyInfo();
     }
     else{
         $('#login_modal').on('shown.bs.modal', () => {
@@ -28,7 +27,8 @@ $(() => {
     }
     $('#cart_modal').on('shown.bs.modal', () => {
         $("#cartContent").html("<img src='img/loader.gif' />");
-        loadItensToCart(); 
+        loadItensToCart();
+        $("#cart_state").html('');
     });
     $('#order_modal').on('shown.bs.modal', () => {
         loadMyOrder(); 
@@ -37,6 +37,9 @@ $(() => {
     // console.log(document.cookie)
     // Load all products from the Shop API
     fetchAllProductAsync();
+    $('#cart_modal').on('hidden.bs.modal', function () {
+        $("#cart_state").html('');
+    })
 });
 /* This function will update the text in the tips div the the text and the css */
 function updateTips(tips, text) {
@@ -77,7 +80,7 @@ loadMyInfo = () => {
         if(status == "success"){
             try {
                 var r = JSON.parse(data),
-                    orders = r.data,
+                    orders = r.data;
                     totalPurchasePrice = 0;
                 $.each(orders, (i, order) => {
                     var order = new Order(order[0], order[1], order[2], order[3], order[4]);
@@ -117,22 +120,7 @@ login = () => {
         updateTips(tips, "The password must be filled.");
         password_login.focus();
     }
-    else if (username_login.val() == password_login.val()) {
-        updateTips(tips, "The username and password must be different.");
-        password_login.focus();
-    }
-    else if (password_login.val().includes(username_login.val())) {
-        updateTips(tips, "The password must not contain the username.");
-        password_login.focus();
-    }
     else {
-        bValid = bValid && checkLength(tips, username_login, "username", 5, 20, tips);
-        bValid = bValid && checkRegexp(tips, username_login, /[QWERTYUIOPASDFGHJKLZXCVBNM]([0-9qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM])+$/i, "The username must begin with a letter and followed by numbers or letters.", tips);
-        bValid = bValid && checkLength(tips, password_login, "password", 6, 20, tips);
-        bValid = bValid && checkRegexp(tips, password_login, /[0-9]/, "The password must containt at least one number.", tips);
-        bValid = bValid && checkRegexp(tips, password_login, /[qwertyuiopasdfghjklzxcvbnm]/, "The password must contain at least one lowercase letter.", tips);
-        bValid = bValid && checkRegexp(tips, password_login, /[QWERTYUIOPASDFGHJKLZXCVBNM]/, "The password must contain at least one capital letter.", tips);
-        bValid = bValid && checkRegexp(tips, password_login, /[@£€#$%&*+-?!]/, "The password must consist of at least 1 special character, namely @, £, €, #, $, %, &, *, +, -, ? or !.", tips);
         if (bValid) {
             loginAsync();
         }
@@ -223,6 +211,9 @@ signupAsync = () => {
                     tips.html("Sign up success!");
                     $("#signup_modal").modal('hide');
                     toastr.success('New client created!');
+                    cleanCart();
+                    location.reload();
+
                 }
                 else{
                     updateTips(tips, r.result);
@@ -346,7 +337,7 @@ fetchAllProductAsync = () =>{
                     products = r.data;
                 total_product = products.length;
                 $.each(products, (i, product) => {
-                    productArray[i] = new Product(product[0], product[1], product[2], product[3], product[4]);
+                    productArray[i] = new Product(product[0], product[1], product[2], product[4], product[3]);
                 });
                 paginationGroup = Math.ceil(total_product/paginationItemPerIndex);
                 // Create the pagination
@@ -432,7 +423,8 @@ loadProductPerGroupAsync = () => {
                                 htmlCreated += '  <p>Out of stock</p>';
                             // Check if there's any rated cookie for this product
                             var cookieName = 'product_rated' + product.getId(),
-                                cookieValueStored = getCookie(cookieName);
+                                cookieValueStored = getCookie(cookieName),
+                                logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest';
                             if (cookieValueStored && cookieValueStored.includes(logged_username))
                                 htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
                             else
@@ -461,7 +453,8 @@ loadProductPerGroupAsync = () => {
                                 htmlCreated += '  <p>Out of stock</p>';
                             // Check if there's any rated cookie for this product
                             var cookieName = 'product_rated' + product.getId(),
-                                cookieValueStored = getCookie(cookieName);
+                                cookieValueStored = getCookie(cookieName),
+                                logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest';
                             if (cookieValueStored && cookieValueStored.includes(logged_username))
                                 htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
                             else
@@ -491,7 +484,8 @@ loadProductPerGroupAsync = () => {
                                 htmlCreated += '  <p>Out of stock</p>';
                             // Check if there's any rated cookie for this product
                             var cookieName = 'product_rated' + product.getId(),
-                                cookieValueStored = getCookie(cookieName);
+                                cookieValueStored = getCookie(cookieName),
+                                logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest';
                             if (cookieValueStored && cookieValueStored.includes(logged_username))
                                 htmlCreated += '<a class="btn btn-primary" href="javascript:ratingProduct(' + product.getId() + ')" role="button"><i class="fas fa-star"> Ratings</i></a>';
                             else
@@ -522,17 +516,7 @@ loadProductPerGroupAsync = () => {
 ratingProduct = (id) => {
     $("#ratingContent").html("<img src='img/loader.gif' />");
     t_product_fk = id;
-    var cookieName = 'product_rated' + id,
-    cookieValueStored = getCookie(cookieName);
-    // Check if there was any previous rating for this product id that includes this logged username
-    if(cookieValueStored && cookieValueStored.includes(logged_username)){
-        loadRatingAsync();
-    }
-    else{
-        $("#ratingContent").html('<form class="rating"><div class="form-group"><label>Rate</label><input id="rate" type="number" min="1" max="5" value="1" class="form-control form-control-user" /></div><hr /><div id="rating_state" class="d-flex justify-content-center" role="alert"></div></form>');
-        $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button><a class="btn btn-success" href="javascript:insertRating()">Rate</a>');
-        $("#rate").focus();
-    }
+    loadRatingAsync();
     $("#rating_modal").modal('show');
 }
 /* This function will validate the rate and call the insert async function */
@@ -556,7 +540,8 @@ insertRating = () => {
 }
 /* This async function will call the shop api and perfom the insert rating action */
 insertRatingAsync = () => {
-    var tips = $("#rating_state");
+    var tips = $("#rating_state"),
+        logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest';
     tips.html("<img src='img/loader.gif' />");
     $.post("backend/api/shop.php?action=insertRating",
     {
@@ -578,7 +563,7 @@ insertRatingAsync = () => {
                         setCookie(cookieName, cookieValueStored + ',' + logged_username);
                     }
                     else
-                    setCookie(cookieName, logged_username);
+                        setCookie(cookieName, logged_username);
                     toastr.success('New rating inserted!');
                     $("#rating_modal").modal('hide');
                 }
@@ -606,17 +591,34 @@ loadRatingAsync = () => {
             try {
                 var r = JSON.parse(data),
                     ratings = r.data,
-                    totalRating = ratings.length,
-                    sumRating = 0,
-                    htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Username</th><th scope="col">Date</th><th scope="col">Rating</th></tr></thead><tbody>';
-                $.each(ratings, (i, rating) => {
-                    var rating = new Rating(rating[2], rating[0], rating[1]);
-                    sumRating += parseInt(rating.getRate());
-                    htmlCreated += '<tr><td>' + rating.getUsername() + '</td><td>' + rating.getDate() + '</td><td>' + convertRateToStars(rating.getRate()) + '</td></tr>';
-                });
-                htmlCreated += '</tbody></table><hr/><h6>Average rating = ' + ((parseFloat(sumRating))/parseFloat(totalRating)) + '</h6>';
-                $("#ratingContent").html(htmlCreated);
-                $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>');
+                    logged_username = $("#logged_username").val() ? $("#logged_username").val() : 'Guest';
+                if(ratings && ratings != "") {
+                    var totalRating = ratings.length,
+                        sumRating = 0,
+                        hasRated = false,
+                        htmlCreated = '<table class="table table-hover table-stripped"><thead><tr><th scope="col">Username</th><th scope="col">Date</th><th scope="col">Rating</th></tr></thead><tbody>';
+                    $.each(ratings, (i, rating) => {
+                        var rating = new Rating(rating[2], rating[0], rating[1]);
+                        if(rating.getUsername() == logged_username)
+                            hasRated = true;
+                        sumRating += parseInt(rating.getRate());
+                        htmlCreated += '<tr><td>' + rating.getUsername() + '</td><td>' + rating.getDate() + '</td><td>' + convertRateToStars(rating.getRate()) + '</td></tr>';
+                    });
+                    htmlCreated += '</tbody></table><hr/><h6>Average rating = ' + ((parseFloat(sumRating))/parseFloat(totalRating)) + '</h6>';
+                    if(!hasRated){
+                        htmlCreated += '<form class="rating"><div class="form-group"><label>New rate</label><input id="rate" type="number" min="1" max="5" value="1" class="form-control form-control-user" /></div><hr /><div id="rating_state" class="d-flex justify-content-center" role="alert"></div></form>';
+                        $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button><a class="btn btn-success" href="javascript:insertRating()">Rate</a>');
+                    }
+                    else{
+                        $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Close</button>');
+                    }
+                    $("#ratingContent").html(htmlCreated);
+                }
+                else{
+                    $("#ratingContent").html('<form class="rating"><div class="form-group"><label>Rate</label><input id="rate" type="number" min="1" max="5" value="1" class="form-control form-control-user" /></div><hr /><div id="rating_state" class="d-flex justify-content-center" role="alert"></div></form>');
+                    $("#ratingButtons").html('<button class="btn btn-secondary" type="button" data-dismiss="modal">Cancel</button><a class="btn btn-success" href="javascript:insertRating()">Rate</a>');
+                    $("#rate").focus();
+                }
             } catch (error) {
                 console.log(error)
             }
@@ -674,8 +676,10 @@ refreshCartFromCookie = () => {
 /* This function will load itens to the cart from cookie */
 loadItensToCart = () => {
     $("#cart_modal").modal('show');
+    $("#cart-balance").html('<b>My balance: </b>$ ' + formatPrice(logged_initial_balance - totalPurchasePrice))
     loadShippingMethodAsynt();
     updateCartItens();
+    updateCartPrice();
 }
 /* This function will format the price adding the decimal part if need 1000,00 $*/
 formatPrice = (price) => {
@@ -684,21 +688,11 @@ formatPrice = (price) => {
             parts = (priceStringWithTwoPlacedDigits + '').split('.'),
             integerPart = parts[0],
             decimalPart = parts[1],
-            integerPart = (integerPart < 1000) ? integerPart : processPrice(integerPart),
             decimalPart = (!decimalPart) ? '00' : completePriceDecimalPart(decimalPart);
         return integerPart + ',' + decimalPart;
     }
     catch(error){
         console.log(error);
-    }
-}
-/* This function will process recursively the space between thousands in integer part */
-processPrice = (price) => {
-    if (price < 1000) return (price);
-    else {
-        var quotient = parseInt(price / 1000),
-            remainder = parseInt(price % 1000);
-        return processPrice(quotient) + " " + completePriceRemainder(remainder);
     }
 }
 /* This function will complete the remainder digits until complete three digits */
@@ -718,6 +712,8 @@ completePriceDecimalPart = (decimalPart) => {
 }
 /* This async function will load shipping method from the database using Shop API */
 loadShippingMethodAsynt = () => {
+    t_shipping_fk = undefined;
+    cartShippingCost = -1;
     $.post("backend/api/shop.php?action=fetchAllShippingToSelect",
     { },
     (data, status) => {
@@ -772,15 +768,16 @@ updateCartItens = () => {
             hasItem = true;
             var name = productArray[i]['name'],
                 price = parseFloat(productArray[i]['price']).toFixed(2),
+                quantity = parseInt(productArray[i]['quantity']),
                 priceTimesQuantity = parseFloat(price * cookieValueStored).toFixed(2);
                 _cartTotalPrice += parseFloat(priceTimesQuantity);
-            htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center">' + cookieValueStored + '</div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
+            htmlCreated += '<tr><td><div style="text-align:center"><a href="javascript:removeProductFromCart(' + id + ')" class="btn btn-danger"><i class="far fa-trash-alt"></i></a></div></td><td><div style="text-align:center"><a href="javascript:updateProductFromCart(' + id + ')" class="btn btn-info"><i class="far fa-edit"></i></a></div></td><td><b>' + name + '</b></td><td><div style="text-align:center"><input id="quantityToUpd' + id + '" type="number" min="1" max="' + quantity + '" value="' + cookieValueStored + '" style="width: 60px" /></div></td><td><div style="text-align:right">' + formatPrice(price) + ' $</div></td><td><div style="text-align:right">' + formatPrice(priceTimesQuantity) + ' $</div></td></tr>';
         }
     }
-    htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div style="text-align:right">' + formatPrice(_cartTotalPrice) + ' $</div></th></tr>';
+    htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div style="text-align:right">' + formatPrice(_cartTotalPrice) + ' $</div></th></tr>';
     $("#cartContent").html(htmlCreated);
-    htmlCreated  = '<tr><th colspan="2" scope="col"><label style="margin-top: 5px;">Shipping method</label></th><th colspan="2" scope="col"><select id="shippingMethodContent" class="form-control"></select></th><th scope="col"><div id="cartShippingPrice" style="text-align:right"></div></th></tr>';
-    htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div id="cartFinalPrice" style="text-align:right"></div></th></tr>';
+    htmlCreated  = '<tr><th colspan="3" scope="col"><label style="margin-top: 5px;">Shipping method</label></th><th colspan="2" scope="col"><select id="shippingMethodContent" class="form-control"></select></th><th scope="col"><div id="cartShippingPrice" style="text-align:right"></div></th></tr>';
+    htmlCreated += '<tr><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"></th><th scope="col"><div id="cartFinalPrice" style="text-align:right"></div></th></tr>';
     $("#cartFooter").html(htmlCreated); 
     cartTotalPrice = _cartTotalPrice;
     updateCartPrice();
@@ -797,6 +794,23 @@ removeProductFromCart = (id) => {
         refreshCartFromCookie();
         loadShippingMethodAsynt();
     }
+}
+/* This function will update the product quantity from cookie and update the cart */
+updateProductFromCart = (id) => {
+    var cookieName = 'product_added' + id,
+        cookieValueStored = parseInt(getCookie(cookieName)),
+        quantityEnterByClient = parseInt($("#quantityToUpd" + id).val()),
+        sumOfItens = 0;
+    // If this product was added to cart and stored into cookie let's sum with stored quantity
+    if (cookieValueStored) {
+        sumOfItens = quantityEnterByClient;
+        delCookie(cookieName);
+    }
+    setCookie(cookieName, sumOfItens);
+    refreshCartFromCookie();
+    loadShippingMethodAsynt();
+    updateCartItens();
+    toastr.success('Quantity item updated!');
 }
 /* This async function will perform the buy action and generate an paid order */
 buyAsync = () => {
@@ -825,6 +839,7 @@ buyAsync = () => {
                                 cleanCart();
                                 toastr.success("New order processed!");
                                 $("#cart_modal").modal('hide');
+                                location.reload();
                             }
                             else{
                                 updateTips(tips, r.result);
