@@ -676,6 +676,7 @@ refreshCartFromCookie = () => {
 /* This function will load itens to the cart from cookie */
 loadItensToCart = () => {
     $("#cart_modal").modal('show');
+    var logged_initial_balance = parseFloat($("#logged_initial_balance").val()) ? parseFloat($("#logged_initial_balance").val()) : 0;
     $("#cart-balance").html('<b>My balance: </b>$ ' + formatPrice(logged_initial_balance - totalPurchasePrice))
     loadShippingMethodAsynt();
     updateCartItens();
