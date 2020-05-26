@@ -647,8 +647,12 @@ convertRateToStars = (n) => {
 addToCart = (id) => {
     var cookieName = 'product_added' + id,
         cookieValueStored = parseInt(getCookie(cookieName)),
-        quantityEnterByClient = parseInt($("#quantityToAdd" + id).val()) <= 0 ? 1 : parseInt($("#quantityToAdd" + id).val()),
+        quantityEnterByClient = parseInt($("#quantityToAdd" + id).val()),
         sumOfItens = 0;
+    if(quantityEnterByClient <= 0){
+        alert("The product quantity must be greater than 0 (zero)!");
+        return;
+    }
     // If this product was added to cart and stored into cookie let's sum with stored quantity
     if (cookieValueStored) {
         sumOfItens = cookieValueStored + quantityEnterByClient;
@@ -800,8 +804,12 @@ removeProductFromCart = (id) => {
 updateProductFromCart = (id) => {
     var cookieName = 'product_added' + id,
         cookieValueStored = parseInt(getCookie(cookieName)),
-        quantityEnterByClient = parseInt($("#quantityToUpd" + id).val()) <= 0 ? 1 : parseInt($("#quantityToUpd" + id).val()),
+        quantityEnterByClient = parseInt($("#quantityToUpd" + id).val()),
         sumOfItens = 0;
+    if(quantityEnterByClient <= 0){
+        alert("The product quantity must be greater than 0 (zero)!");
+        return;
+    }
     // If this product was added to cart and stored into cookie let's sum with stored quantity
     if (cookieValueStored) {
         sumOfItens = quantityEnterByClient;
