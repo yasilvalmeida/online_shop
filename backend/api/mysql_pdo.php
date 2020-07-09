@@ -13,7 +13,7 @@
         */
         function __construct()
         {
-            $this->hostname = "192.168.1.2";
+            $this->hostname = "localhost";
             $this->database = "shop_db";
             $this->charset = "utf8";
             $this->username = "shop_sa";
