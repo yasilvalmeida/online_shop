@@ -13,11 +13,11 @@
         */
         function __construct()
         {
-            $this->hostname = "localhost";
+            $this->hostname = "192.168.1.2";
             $this->database = "shop_db";
             $this->charset = "utf8";
-            $this->username = "root";
-            $this->password = "";
+            $this->username = "shop_sa";
+            $this->password = "Shop*2020@";
             $this->database_connection();
         }
         /* This function create an mysql database connection */
